@@ -1,0 +1,16 @@
+---
+
+# Kuberbetes Cluster playbook
+
+# Install python required for Ansible
+- include: bootstrap-python.yml
+  tags:
+    - bootstrap
+
+# Set up passwdless sudo and SSH Keys if needed
+- include: bootstrap-ssh.yml
+  tags:
+    - bootstrap
+- include: bootstrap-sudo.yml
+  tags:
+    - bootstrap

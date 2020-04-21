@@ -1,0 +1,11 @@
+---
+
+- hosts: all # 让all group的节点执行
+  become: true # 使用root权限
+  gather_facts: False # 不进行facts的收集
+  tasks:
+    - name: install python (no proxy)
+      raw: test -e /usr/bin/python || (apt -y update && apt install -y python-minimal)
+      register: output
+      changed_when: output.stdout != ""
+

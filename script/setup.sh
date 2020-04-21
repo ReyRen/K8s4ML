@@ -130,18 +130,6 @@ else
     echo "ERROR: Unable to install Ansible Galaxy roles"
 fi
 
-# Update submodules, 这里主要涉及到的是kubespray
-git status >/dev/null 2>&1
-if [ $? -eq 0 ] ; then
-    if [ $PROXY_USE -gt 0 ]; then
-        . ${SCRIPT_DIR}/proxy.sh && git submodule update --init
-    else
-        git submodule update --init
-    fi
-else
-    echo "ERROR: Unable to update Git submodules"
-fi
-
 # Copy default configuration
 CONFIG_DIR=${CONFIG_DIR:-./config}
 if [ ! -d "${CONFIG_DIR}" ] ; then
