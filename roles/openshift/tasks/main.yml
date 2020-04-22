@@ -1,0 +1,21 @@
+---
+
+- name: install virtualenv and set setuptools
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - "virtualenv"
+    - "python-setuptools"
+  when: ansible_distribution == 'Ubuntu'
+
+- name: create location for K8s4ML files
+  file:
+    path: "{{ k8s4ml_dir }}" # /opt/k8s4ml
+    state: directory
+
+- name: install openshift python client for k8s_raw module
+  pip:
+    name: openshift
+    virtualenv: "{{ k8s4ml_venv }}"
+  when: ansible_distribution == 'Ubuntu'

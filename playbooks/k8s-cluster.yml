@@ -14,3 +14,30 @@
 - include: bootstrap-sudo.yml
   tags:
     - bootstrap
+
+# Configure Chrony (NTP) sync
+- include: chrony-client.yml
+
+# Install the OpenShift API libraries required by the GPU plugin
+# openshift是基于容器计数搭建的一个云平台。这里的容器技术即包括Docker和Kunbernetes
+- include: bootstrap-openshift.yml
+  tags:
+    - bootstrap
+
+# Install 'sshpass' program for: https://github.com/ansible/ansible/issues/56629
+- hosts: all
+  gather_facts: true
+  tasks:
+    - name: install sshpass
+      package: # Installs, upgrade and removes packages using the underlying OS package manager.
+               # https://docs.ansible.com/ansible/latest/modules/package_module.html#package-module
+        name: sshpass
+        state: present
+  tags:
+    - bootstrap
+
+# Install Kubernetes
+# for configuration, see: config/group_vars/k8s-cluster.yml
+- include: ../kubespray/cluster.yml
+  tags:
+    - k8s

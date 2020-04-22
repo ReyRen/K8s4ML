@@ -1,0 +1,40 @@
+---
+
+- name: prep_download | Set a few facts
+  set_fact:
+    download_force_cache: "{{ true if download_run_once else download_force_cache }}"
+  tags:
+    - facts
+
+
+- name: prep_download | Register docker images info
+  shell: "{{ image_info_command }}"
+  no_log: false
+  register: docker_images
+  failed_when: false
+  changed_when: false
+  check_mode: no
+  when: download_container # If this is set to true will download container
+
+- name: prep_download | Create staging directory on remote node
+  file:
+    path: "{{ local_release_dir }}/images" # /tmp/releases
+    state: directory
+    recurse: yes
+    mode: 0755
+    owner: "{{ ansible_ssh_user | default(ansible_user_id) }}"
+
+- name: prep_download | Create local cache for files and images on control node
+  file:
+    path: "{{ download_cache_dir }}/images"
+    state: directory
+    recurse: yes
+    mode: 0755
+  delegate_to: localhost
+  delegate_facts: no
+  run_once: true
+  become: false
+  when:
+    - download_force_cache
+  tags:
+    - localhost

@@ -1,0 +1,22 @@
+---
+
+# cluster-master if not specified
+- name: prep_kubeadm_images | Download kubeadm binary
+  include_tasks: "download_file.yml"
+  vars:
+    download: "{{ download_defaults | combine(downloads.kubeadm) }}"
+  when:
+    - not skip_downloads | default(false)
+    - downloads.kubeadm.enabled
+
+- name: prep_kubeadm_images | Sync kubeadm binary to nodes
+  include_tasks: "sync_file.yml"
+  vars:
+    download: "{{ download_defaults | combine(downloads.kubeadm) }}"
+  when:
+    - not skip_downloads | default(false)
+    - downloads.kubeadm.enabled
+    - download_run_once
+    - group_names | intersect(download.groups) | length
+      # group_names表示当前正在执行task的主机位于的组
+

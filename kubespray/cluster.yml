@@ -1,0 +1,25 @@
+---
+
+- hosts: localhost
+  gather_facts: false
+  become: no
+  tasks:
+    - name: "Check ansible version >= 2.7.8"
+      assert:
+        msg: "Ansible must be v2.7.8 or higher"
+        that: # ansible_version is kind of special variables in ansible
+              # Dictionary/map that contains information about the current running version of ansible, it has the following keys: full, major, minor, revision and string.
+          - ansible_version.string is version("2.7.8", ">=")
+      tags:
+        - check
+  vars: # ansible_connection is kind of special variables in ansible
+        # The connection plugin actually used for the task on the target host
+    ansible_connection: local
+
+- hosts: k8s-cluster:etcd # 这里表示的target是k8s-cluster和etcd组(不是&和!)
+                          # 因为这里我的etcd是一个节点并且是在master上，所以这里的效果和hosts: k8s-cluster是一样的
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}" # 有任务错误时，立即停止
+  gather_facts: false
+  roles:
+    - { role: kubespray-defaults}
+

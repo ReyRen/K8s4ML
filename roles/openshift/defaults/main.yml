@@ -1,0 +1,2 @@
+k8s4ml_dir: /opt/k8s4ml
+k8s4ml_venv: '{{ k8s4ml_dir }}/venv'

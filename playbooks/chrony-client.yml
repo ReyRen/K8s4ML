@@ -1,0 +1,12 @@
+---
+
+# Chrony will ensure that the clocks of all your servers are up to sync and can be used to sync with an internal server
+- hosts: all
+  become: true
+  tasks:
+    - name: Configure Chrony client
+      include_role:
+        name: DeepOps.chrony # galaxy-roles/DeepOps.chrony, 这是个公共方法的roles
+
+    - name: Set timezone
+      shell: "timedatectl set-timezone {{ chrony_timezone }}"
