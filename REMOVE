@@ -1,2 +1,5 @@
 /opt/k8s4ml
 /tmp/release
+/tmp/kubespray_cache 
+/etc/kubernetes
+/usr/local/bin/
