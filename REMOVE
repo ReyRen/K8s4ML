@@ -3,3 +3,9 @@
 /tmp/kubespray_cache 
 /etc/kubernetes
 /usr/local/bin/
+~/.ansible
+user -- kube
+/usr/libexec/kubernetes/kubelet-plugins/volume/exec
+/etc/cni/net.d
+/opt/cni/bin
+/var/lib/calico

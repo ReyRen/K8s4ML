@@ -23,3 +23,17 @@
   roles:
     - { role: kubespray-defaults} # 什么也每执行基本，因为skip_downloads是true
     - { role: bootstrap-os, tags: bootstrap-os}
+
+#
+#到目前为之，安装了python, 按照inventory_name更改了各个主机的名字
+#剩下的什么也每做
+#
+
+- hosts: k8s-cluster:etcd
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults} # 用来使用一些其中的变量
+    - { role: kubernetes/preinstall, tags: preinstall }
+      #    - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
+      #    - { role: download, tags: download, when: "not skip_downloads" }
+

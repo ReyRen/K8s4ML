@@ -1,0 +1,46 @@
+---
+# k8s-cluster
+
+# Disable swap
+- import_tasks: 0010-swapoff.yml
+  when:
+    - not dns_late
+    - disable_swap
+
+# 确保kube-master. kube-node, etcd组不为空
+# 如果进程管理工具不是systemd, stop
+# etcd集群族是奇数
+# kube支持的version
+# master的内存>= 1500M node>=1024M
+# 保证网络地址的可用性
+# calico version >= 3.0.0
+# .......
+- import_tasks: 0020-verify-settings.yml
+  when:
+    - not dns_late
+  tags:
+    - asserts
+
+# This is run before bin_dir is pinned because these tasks are run on localhost
+# 就是把以前的/etc/credentials移动到了/etc/ansible/credentials 如果以前的存在的话
+- import_tasks: 0030-pre_upgrade.yml
+  run_once: true
+  when:
+    - not dns_late
+  tags:
+    - upgrade
+
+- import_tasks: 0040-set_facts.yml
+  tags:
+    - resolvconf
+    - facts
+
+- import_tasks: 0050-create_directories.yml
+  when:
+    - not dns_late
+
+- import_tasks: 0060-resolvconf.yml
+  when:
+    - dns_mode != 'none'
+  tags:
+    - bootstrap-os

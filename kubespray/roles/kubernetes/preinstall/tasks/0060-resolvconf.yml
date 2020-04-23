@@ -1,0 +1,39 @@
+---
+# 把8.8.8.8和114.114.114.114(upstream_dns添加到resolv.conf中)
+- name: Add domain/search/nameservers/options to resolv.conf
+  blockinfile:
+    path: "{{ resolvconffile }}"
+    block: |-
+      {% for item in nameserverentries.split(',') -%}
+      {{ item }}
+      {% endfor %}
+    state: present
+    insertbefore: BOF
+    create: yes
+    backup: yes
+    marker: "# Ansible entries {mark}"
+  notify: Preinstall | restart network
+
+# 将添加的block之前的全部都删除
+- name: Remove search/domain/nameserver options before block
+  replace:
+    dest: "{{ item[0] }}"
+    regexp: '^{{ item[1] }}[^#]*(?=# Ansible entries BEGIN)'
+    backup: yes
+    follow: yes
+  with_nested:
+    - "{{ [resolvconffile, base|default(''), head|default('')] | difference(['']) }}"
+    - [ 'search ', 'nameserver ', 'domain ', 'options ' ]
+  notify: Preinstall | restart network
+
+- name: Remove search/domain/nameserver options after block
+  replace:
+    dest: "{{ item[0] }}"
+    regexp: '(# Ansible entries END\n(?:(?!^{{ item[1] }}).*\n)*)(?:^{{ item[1] }}.*\n?)+'
+    replace: '\1'
+    backup: yes
+    follow: yes
+  with_nested:
+    - "{{ [resolvconffile, base|default(''), head|default('')] | difference(['']) }}"
+    - [ 'search ', 'nameserver ', 'domain ', 'options ' ]
+  notify: Preinstall | restart network
