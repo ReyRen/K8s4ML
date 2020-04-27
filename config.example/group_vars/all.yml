@@ -27,17 +27,15 @@
 # Playbook: dns-config
 #dns_config_servers: [8.8.8.8]
 #dns_config_search: [example.com]
+upstream_dns_servers: [8.8.8.8,114.114.114.114]
 
 # NTP configuration
 # Playbook: chrony-client
 chrony_service_state: "started"
 chrony_service_enabled: "yes"
-chrony_timezone: "Etc/UTC"
+chrony_timezone: "Asia/Shanghai"
 chrony_config_server:
-  - 0.pool.ntp.org
-  - 1.pool.ntp.org
-  - 2.pool.ntp.org
-  - 3.pool.ntp.org
+  - cn.pool.ntp.org
 
 
 ################################################################################
@@ -49,17 +47,17 @@ chrony_config_server:
 
 # Extra software to install or remove
 # Playbook: software
-#software_extra_packages:
-#  - curl
-#  - git
-#  - rsync
-#  - screen
-#  - tmux
-#  - vim
-#  - wget
-#  - build-essential
-#  - linux-tools-generic
-#  - "{{ 'linux-headers-' + ansible_kernel }}"
+software_extra_packages:
+  - curl
+  - git
+  - rsync
+  - screen
+  - tmux
+  - vim
+  - wget
+  - build-essential
+  - linux-tools-generic
+  - "{{ 'linux-headers-' + ansible_kernel }}"
 #software_remove_packages:
 #  - popularity-contest
 

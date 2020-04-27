@@ -1,0 +1,27 @@
+---
+# k8s-cluster
+- name: Update package management cache (APT)
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+  tags:
+    - bootstrap-os
+
+- name: Update common_required_pkgs with ipvsadm when kube_proxy_mode is ipvs
+  set_fact:
+    common_required_pkgs: "{{ common_required_pkgs|default([]) + ['ipvsadm', 'ipset'] }}"
+  when: kube_proxy_mode == 'ipvs'
+
+- name: Install packages requirements
+  action:
+    module: "{{ ansible_pkg_mgr }}"
+    name: "{{ required_pkgs | default([]) | union(common_required_pkgs|default([])) }}"
+    state: latest
+  register: pkgs_task_result
+  until: pkgs_task_result is succeeded
+  retries: 4
+  delay: "{{ retry_stagger | random + 3 }}"
+  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "ClearLinux"] or is_atomic)
+  tags:
+    - bootstrap-os

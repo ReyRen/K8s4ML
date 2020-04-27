@@ -19,10 +19,6 @@
   setup:
     gather_subset: '!all'
 
-- name: tttttttttttttttttttttt
-  debug:
-    msg: "{{ inventory_hostname }}"
-
 - name: Assign inventory name to unconfigured hostnames (non-CoreOS, Suse and ClearLinux)
   hostname:
     name: "{{ inventory_hostname }}"

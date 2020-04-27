@@ -9,13 +9,9 @@
 # NOTE: Use existing hostnames here, DeepOps will configure server hostnames to match these values
 ######
 [all]
-#mgmt01     ansible_host=10.0.0.1
-#mgmt02     ansible_host=10.0.0.2
-#mgmt03     ansible_host=10.0.0.3
-#login01    ansible_host=10.0.1.1
-#gpu01      ansible_host=10.0.2.1
-#gpu02      ansible_host=10.0.2.2
-
+master	ansible_host=192.168.0.212
+node1	ansible_host=192.168.0.210
+node2	ansible_host=192.168.0.211
 ######
 # KUBERNETES
 ######
@@ -23,31 +19,29 @@
 #mgmt01
 #mgmt02
 #mgmt03
+master
 
 # Odd number of nodes required
 [etcd]
 #mgmt01
 #mgmt02
 #mgmt03
+master
 
 # Also add mgmt/master nodes here if they will run non-control plane jobs
 [kube-node]
 #gpu01
 #gpu02
+node1
+node2
 
 [k8s-cluster:children]
 kube-master 	 
 kube-node 	 
 
-######
-# SLURM
-######
 [slurm-master]
-#login01
 
 [slurm-node]
-#gpu01
-#gpu02
 
 [slurm-cluster:children]
 slurm-master
@@ -58,7 +52,6 @@ slurm-node
 ######
 [all:vars]
 # SSH User
-#ansible_user=ubuntu
-#ansible_ssh_private_key_file='~/.ssh/id_rsa'
-# SSH bastion/jumpbox
+ansible_user=root
+ansible_ssh_private_key_file='~/.ssh/id_rsa'
 #ansible_ssh_common_args='-o ProxyCommand="ssh -W %h:%p -q ubuntu@10.0.0.1"'

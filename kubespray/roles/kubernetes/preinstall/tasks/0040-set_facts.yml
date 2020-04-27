@@ -27,18 +27,6 @@
   set_fact:
     resolvconf: >-
       {%- if resolvconf.rc == 0 -%}true{%- else -%}false{%- endif -%}
-    bogus_domains: |-
-      {% for d in [ 'default.svc.' + dns_domain, 'svc.' + dns_domain ] + searchdomains|default([]) -%}
-      {{ dns_domain }}.{{ d }}./{{ d }}.{{ d }}./com.{{ d }}./
-      {%- endfor %}
-    cloud_resolver: >-
-      {%- if cloud_provider is defined and cloud_provider == 'gce' -%}
-        ['169.254.169.254']
-      {%- elif cloud_provider is defined and cloud_provider == 'aws' -%}
-        ['169.254.169.253']
-      {%- else -%}
-        []
-      {%- endif -%}
 
 - name: check if kubelet is configured
   stat:

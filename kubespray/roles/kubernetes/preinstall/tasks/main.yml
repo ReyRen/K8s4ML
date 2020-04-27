@@ -44,3 +44,26 @@
     - dns_mode != 'none'
   tags:
     - bootstrap-os
+
+- import_tasks: 0070-system-packages.yml
+  when:
+    - not dns_late
+  tags:
+    - bootstrap-os
+
+- import_tasks: 0080-system-configurations.yml
+  when:
+    - not dns_late
+  tags:
+    - bootstrap-os
+
+- import_tasks: 0090-etchosts.yml
+  when:
+    - not dns_late
+  tags:
+    - bootstrap-os
+    - etchosts
+
+# We need to make sure the network is restarted early enough so that docker can later pick up the correct system
+# nameservers and search domains
+- meta: flush_handlers # flush_handlers会立即执行handler
