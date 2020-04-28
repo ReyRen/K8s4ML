@@ -1,0 +1,9 @@
+---
+# k8s-cluster
+- name: Ensure old versions of Docker are not installed. | Debian
+  apt:
+    name: '{{ docker_remove_packages_apt }}'
+    state: absent
+  when:
+    - ansible_os_family == 'Debian'
+    - (docker_versioned_pkg[docker_version | string] is search('docker-ce'))

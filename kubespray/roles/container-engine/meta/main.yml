@@ -1,0 +1,10 @@
+---
+
+# k8s-cluster
+dependencies:
+  - role: container-engine/docker
+    when:
+      - container_manager == 'docker'
+    tags:
+      - container-engine
+      - docker
