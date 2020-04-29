@@ -32,8 +32,9 @@
 - hosts: k8s-cluster:etcd
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults} # 用来使用一些其中的变量
+    - { role: kubespray-defaults} # 用来使用一些其中的变量 skip_downlads is true
     - { role: kubernetes/preinstall, tags: preinstall }
     - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
-      #    - { role: download, tags: download, when: "not skip_downloads" }
+    - { role: download, tags: download, when: "not skip_downloads" }
+      # 这里的download是执行的, 因为kubespray-defaults中的skip_downloads true是在执行kubespray-defaults时， meta中强打进去的变量, 出了kubespray-defaults就失效了. 但是其他的vars是可以共享的（除了那些特殊打入的变量不能外部rols共享）
 

@@ -11,3 +11,10 @@ kubespray v2.11.2, 其中支持的是Kubernetes v1.15.11
 
 **PS**, 解释以下纠结于这个的原因是: kubespray中[PR#5628](https://github.com/kubernetes-sigs/kubespray/pull/5628)
 激烈的讨论关于在master分支上出现`kube_version`和`kube_version_min_required`的问题. 
+
+记录一个通过repository:tag的方式删除相同image id的image的方式
+```
+docker images|grep "redis关键字"|awk '{print $1":"$2}'|xargs docker rmi 
+```
+
+Move all necessary container images from gcr or others to "my docker hub", which is whoami/XXX:tag. Fucking the Firewall....

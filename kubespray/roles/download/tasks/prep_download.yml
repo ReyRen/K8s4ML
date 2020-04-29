@@ -1,12 +1,12 @@
 ---
 - name: prep_download | Register docker images info
-  shell: "{{ image_info_command }}"
+  shell: "{{ image_info_command }}" # 查看当前的docker images
   no_log: false
   register: docker_images
   failed_when: false
   changed_when: false
   check_mode: no
-  when: download_container # If this is set to true will download container
+  when: download_container # true
 
 - name: prep_download | Create staging directory on remote node
   file:

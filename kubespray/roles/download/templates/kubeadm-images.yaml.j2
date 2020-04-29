@@ -5,7 +5,8 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
-imageRepository: {{ kube_image_repo }}
+#imageRepository: {{ kube_image_repo }}
+imageRepository: "registry.cn-hangzhou.aliyuncs.com/google_containers"
 kubernetesVersion: {{ kube_version }}
 etcd:
   external:

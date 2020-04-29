@@ -9,3 +9,6 @@ user -- kube
 /etc/cni/net.d
 /opt/cni/bin
 /var/lib/calico
+docekr-ce
+/etc/systemd/system/docker.service
+/etc/systemd/system/docekr*
