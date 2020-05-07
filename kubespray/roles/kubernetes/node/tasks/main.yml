@@ -1,0 +1,9 @@
+---
+# k8s-cluster
+- import_tasks: facts.yml
+  tags:
+    - facts
+
+- import_tasks: pre_upgrade.yml
+  tags:
+    - kubelet

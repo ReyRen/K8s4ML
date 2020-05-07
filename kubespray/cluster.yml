@@ -54,3 +54,27 @@
         etcd_cluster_setup: true
         etcd_events_cluster_setup: "{{ etcd_events_cluster_enabled }}" # false
       when: not etcd_kubeadm_enabled | default(false)
+
+#
+# 到目前为止, etcd已经部署完成, 载体是docker，但是交给了host的systemd管理
+#
+- hosts: k8s-cluster
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults}
+    - role: etcd
+      tags: etcd
+      vars:
+        etcd_cluster_setup: false
+        etcd_events_cluster_setup: false
+      when: not etcd_kubeadm_enabled| default(false)
+
+# 以上这一块儿主要是将各自ca和各自node的key进行奋发拷贝/etc/ssl/etcd
+
+
+- hosts: k8s-cluster
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults}
+    - { role: kubernetes/node, tags: node }
+
