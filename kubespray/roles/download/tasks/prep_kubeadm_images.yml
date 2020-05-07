@@ -1,6 +1,6 @@
 ---
 
-# cluster-master if not specified
+# cluster-master only if not specified
 
 # 将kubeadm的二进制文件下载到了/tmp/releases下
 - name: prep_kubeadm_images | Download kubeadm binary

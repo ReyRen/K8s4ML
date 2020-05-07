@@ -38,3 +38,19 @@
     - { role: download, tags: download, when: "not skip_downloads" }
       # 这里的download是执行的, 因为kubespray-defaults中的skip_downloads true是在执行kubespray-defaults时， meta中强打进去的变量, 出了kubespray-defaults就失效了. 但是其他的vars是可以共享的（除了那些特殊打入的变量不能外部rols共享）
 
+
+#
+# 到目前为止，kubernetes配置文件目录, download中的file和container images
+# 都已经下载完毕
+#
+        
+- hosts: etcd
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults}
+    - role: etcd
+      tags: etcd
+      vars:
+        etcd_cluster_setup: true
+        etcd_events_cluster_setup: "{{ etcd_events_cluster_enabled }}" # false
+      when: not etcd_kubeadm_enabled | default(false)
