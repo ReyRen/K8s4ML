@@ -15,6 +15,8 @@ docekr-ce
 /etc/ssl/etcd
 /etc/systemd/system/etcd.service
 /etc/etcd.env
+/var/lib/
 /etc/nginx
 /etc/modules-load.d/
+/etc/bash_completion.d/
 /etc/systemd/system/kubelet.service
