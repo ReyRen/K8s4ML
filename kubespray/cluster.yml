@@ -78,3 +78,11 @@
     - { role: kubespray-defaults}
     - { role: kubernetes/node, tags: node }
 
+# 以上部署好了kubelet,以及service文件，然后还有nginx当作node之间的proxy, 会以pod形式存在
+#
+
+- hosts: kube-master
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults}
+    - { role: kubernetes/master, tags: master }
