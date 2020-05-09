@@ -20,3 +20,4 @@ docekr-ce
 /etc/modules-load.d/
 /etc/bash_completion.d/
 /etc/systemd/system/kubelet.service
+/etc/calico/

@@ -97,3 +97,4 @@
   roles:
     - { role: kubespray-defaults}
     - { role: kubernetes/kubeadm, tags: kubeadm}
+    - { role: network_plugin, tags: network }
