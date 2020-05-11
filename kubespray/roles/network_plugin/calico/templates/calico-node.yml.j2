@@ -71,6 +71,9 @@ spec:
           image: {{ calico_cni_image_repo }}:{{ calico_cni_image_tag }}
           command: ["/install-cni.sh"]
           env:
+            # Interface detect method specified
+           # - name: IP_AUTODETECTION_METHOD
+           #   value: "interface="
             # Name of the CNI config file to create.
             - name: CNI_CONF_NAME
               value: "10-calico.conflist"

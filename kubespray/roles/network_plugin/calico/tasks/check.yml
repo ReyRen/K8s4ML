@@ -10,7 +10,7 @@
     msg: "Check variable definitions seems something is wrong"
   run_once: yes
 
-- name: "Get current version of calico cluster version"
+- name: "Get current version of calico cluster version" # 3.7.3
   shell: "{{ bin_dir }}/calicoctl.sh version  | grep 'Cluster Version:' | awk '{ print $3}'"
   register: calico_version_on_server
   run_once: yes

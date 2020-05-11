@@ -110,7 +110,7 @@
     - 'calico_conf.stdout == "0"'
     - calico_version is version("v3.3.0", ">=")
 
-- name: "Determine nodeToNodeMesh needed state"
+- name: "Determine nodeToNodeMesh needed state" # it would be use node to node mesh 
   set_fact:
     nodeToNodeMeshEnabled: "false"
   when:
@@ -152,7 +152,7 @@
   #    - "{{ peers|selectattr('scope','defined')|selectattr('scope','equalto', 'global')|list|default([]) }}"
   #  when:
   #    - inventory_hostname == groups['kube-master'][0]
-  #    - peer_with_router|default(false)
+  #    - peer_with_router|default(false) # to enable the peering with the datacenter's border router
 
   #- name: Calico | Configure peering with route reflectors at global scope
   #  shell: |

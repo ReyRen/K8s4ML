@@ -1,0 +1,9 @@
+---
+dependencies:
+  - role: policy_controller/calico
+    when:
+      - kube_network_plugin == 'calico'
+      - enable_network_policy # true
+      - calico_datastore != "kdd" or calico_policy_version is version('v3.6.0', '>=')
+    tags:
+      - policy-controller
