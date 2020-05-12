@@ -57,7 +57,7 @@ etcd_version: v3.3.10
 #kube_image_repo: "gcr.io/google-containers"
 #kube_image_repo: "registry.cn-hangzhou.aliyuncs.com/google_containers"
 # using my docker hub repoository, where stored all necessary containers
-kube_image_repo: "whoami179"
+kube_image_repo: "172.18.12.16:4000"
 
 # TODO(mattymo): Move calico versions to roles/network_plugins/calico/defaults
 # after migration to container download

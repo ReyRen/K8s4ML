@@ -95,6 +95,13 @@
     selection: hold
   when: ansible_os_family in ["Debian"]
 
+# make the http repository can be pass
+- name: Make sure the daemon file exists
+  template:
+    src: "daemon.json.j2"
+    dest: "/etc/docker/daemon.json"
+  notify: restart docker
+
 - name: ensure docker started, remove our config if docker start failed and try again
   block:
     - name: ensure service is started if docker packages are already present
