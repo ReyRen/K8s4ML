@@ -55,6 +55,7 @@ etcd_version: v3.3.12
 
 # gcr and kubernetes image repo define
 #gcr_image_repo: "gcr.io"
+gcr_image_repo: "172.18.12.16:4000"
 #kube_image_repo: "k8s.gcr.io"
 kube_image_repo: "172.18.12.16:4000"
 

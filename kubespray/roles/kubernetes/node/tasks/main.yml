@@ -76,7 +76,6 @@
   command: "sysctl net.bridge.bridge-nf-call-iptables"
   failed_when: false
   changed_when: false
-  M
   register: sysctl_bridge_nf_call_iptables
 
 - name: Enable bridge-nf-call tables
