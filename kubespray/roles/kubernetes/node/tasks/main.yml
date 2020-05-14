@@ -21,26 +21,25 @@
 - import_tasks: loadbalancer/nginx-proxy.yml
   when:
     - not is_kube_master
-    - loadbalancer_apiserver_localhost # true, because loadbalancer_apiserver is not defined. 
-#K8s components require a loadbalancer to access the apiservers via a reverse proxy. 
-#Kubespray includes support for an nginx-based proxy that resides on each non-master Kubernetes node. 
-#This is referred to as localhost loadbalancing. It is less efficient than a dedicated load balancer because 
-#it creates extra health checks on the Kubernetes apiserver, but is more practical for scenarios where an 
-#external LB or virtual IP management is inconvenient. This option is configured by the variable l
-#oadbalancer_apiserver_localhost (defaults to True. Or False, if there is an external loadbalancer_apiserver defined). 
-#You may also define the port the local internal loadbalancer uses by changing, loadbalancer_apiserver_port. 
-#This defaults to the value of kube_apiserver_port. It is also important to note that Kubespray will only configure 
-#kubelet and kube-proxy on non-master nodes to use the local internal loadbalancer.
+    - loadbalancer_apiserver_localhost # false
     - loadbalancer_apiserver_type == 'nginx'
   tags:
     - nginx
+
+- import_tasks: loadbalancer/haproxy.yml
+  when:
+    - not is_kube_master
+    - loadbalancer_apiserver_localhost # false
+    - loadbalancer_apiserver_type == 'haproxy'
+  tags:
+    - haproxy
 
 - name: Ensure nodePort range is reserved
   sysctl:
     name: net.ipv4.ip_local_reserved_ports
     value: "{{ kube_apiserver_node_port_range }}"
     sysctl_set: yes
-    sysctl_file: "{{ sysctl_file_path }}" # /etc/sysctl.d/99-sysctl.conf
+    sysctl_file: "{{ sysctl_file_path }}"
     state: present
     reload: yes
   when: kube_apiserver_node_port_range is defined
@@ -66,7 +65,6 @@
     state: present
   when: modinfo_br_netfilter.rc == 0
 
-
 - name: Persist br_netfilter module
   copy:
     dest: /etc/modules-load.d/kubespray-br_netfilter.conf
@@ -78,6 +76,7 @@
   command: "sysctl net.bridge.bridge-nf-call-iptables"
   failed_when: false
   changed_when: false
+  M
   register: sysctl_bridge_nf_call_iptables
 
 - name: Enable bridge-nf-call tables
@@ -93,7 +92,7 @@
     - net.bridge.bridge-nf-call-arptables
     - net.bridge.bridge-nf-call-ip6tables
 
-- name: Modprode Kernel Module for IPVS 
+- name: Modprode Kernel Module for IPVS
   modprobe:
     name: "{{ item }}"
     state: present
@@ -148,15 +147,29 @@
     path: "{{ kube_manifest_dir }}/kube-proxy.manifest"
     state: absent
   when:
+    - kube_proxy_remove # false
+  tags:
+    - kube-proxy
+
+- name: Set command for kube-proxy cleanup
+  set_fact:
+    kube_proxy_cleanup_command: >-
+      {%- if container_manager in ['docker', 'crio'] %}
+      {{ docker_bin_dir }}/docker run --rm --privileged -v /lib/modules:/lib/modules {{ kube_proxy_image_repo }}:{{ kube_version }} kube-proxy --cleanup
+      {%- elif container_manager == "containerd" %}
+      ctr run --rm --mount type=bind,src=/lib/modules,dst=/lib/modules,options=rbind:rw {{ kube_proxy_image_repo }}:{{ kube_version }} kube-proxy --cleanup
+      {%- endif %}
+  when:
     - kube_proxy_remove
   tags:
     - kube-proxy
 
 - name: Cleanup kube-proxy leftovers from node
-  command: "{{ bin_dir }}/hyperkube kube-proxy --cleanup"
+  command: "{{ kube_proxy_cleanup_command }}"
+  # `kube-proxy --cleanup`, being Ok as per shown WARNING, still returns 255 from above run (?)
+  ignore_errors: true
   when:
     - kube_proxy_remove
-  ignore_errors: true
   tags:
     - kube-proxy
 

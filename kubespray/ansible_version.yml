@@ -1,0 +1,17 @@
+---
+- hosts: localhost # now used is ansible 2.9.5
+  gather_facts: false
+  become: no
+  vars:
+    minimal_ansible_version: 2.8.0
+    ansible_connection: local
+  tasks:
+    - name: "Check ansible version >={{ minimal_ansible_version }}"
+      assert:
+        msg: "Ansible must be {{ minimal_ansible_version }} or higher"
+        that:
+          - ansible_version.string is version(minimal_ansible_version, ">=")
+      tags:
+        - check
+# ansible_version is kind of special variables in ansible
+# Dictionary/map that contains information about the current running version of ansible, it has the following keys: full, major, minor, revision and string.

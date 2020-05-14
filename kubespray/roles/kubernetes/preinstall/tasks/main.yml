@@ -1,20 +1,11 @@
 ---
-# k8s-cluster
-
+# k8s-cluster and etcd
 # Disable swap
 - import_tasks: 0010-swapoff.yml
   when:
     - not dns_late
     - disable_swap
 
-# 确保kube-master. kube-node, etcd组不为空
-# 如果进程管理工具不是systemd, stop
-# etcd集群族是奇数
-# kube支持的version
-# master的内存>= 1500M node>=1024M
-# 保证网络地址的可用性
-# calico version >= 3.0.0
-# .......
 - import_tasks: 0020-verify-settings.yml
   when:
     - not dns_late
@@ -22,7 +13,6 @@
     - asserts
 
 # This is run before bin_dir is pinned because these tasks are run on localhost
-# 就是把以前的/etc/credentials移动到了/etc/ansible/credentials 如果以前的存在的话
 - import_tasks: 0030-pre_upgrade.yml
   run_once: true
   when:
@@ -42,8 +32,20 @@
 - import_tasks: 0060-resolvconf.yml
   when:
     - dns_mode != 'none'
+    - resolvconf_mode == 'host_resolvconf'
+    - systemd_resolved_enabled.rc != 0
   tags:
     - bootstrap-os
+    - resolvconf
+
+- import_tasks: 0061-systemd-resolved.yml
+  when:
+    - dns_mode != 'none'
+    - resolvconf_mode == 'host_resolvconf'
+    - systemd_resolved_enabled.rc == 0
+  tags:
+    - bootstrap-os
+    - resolvconf
 
 - import_tasks: 0070-system-packages.yml
   when:
@@ -66,4 +68,4 @@
 
 # We need to make sure the network is restarted early enough so that docker can later pick up the correct system
 # nameservers and search domains
-- meta: flush_handlers # flush_handlers会立即执行handler
+- meta: flush_handlers

@@ -1,7 +1,8 @@
 ---
+# k8s-cluster and etcd
 - name: Install Docker plugin
-  command: docker plugin install --grant-all-permissions {{ docker_plugin | quote }} # default is nothing
-  when: docker_plugin is defined
+  command: docker plugin install --grant-all-permissions {{ docker_plugin | quote }}
+  when: docker_plugin is defined # false by default
   register: docker_plugin_status
   failed_when:
     - docker_plugin_status.failed

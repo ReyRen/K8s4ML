@@ -1,4 +1,5 @@
 ---
+# k8s-cluster and etcd
 - name: Remove swapfile from /etc/fstab
   mount:
     name: "{{ item }}"

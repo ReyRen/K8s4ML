@@ -15,7 +15,7 @@
 
 - name: Set Backup Directory
   set_fact:
-    etcd_backup_directory: "{{ etcd_backup_prefix }}/etcd-{{ ansible_date_time.date }}_{{ ansible_date_time.time }}" # /var/backups/etcd-data_time
+    etcd_backup_directory: "{{ etcd_backup_prefix }}/etcd-{{ ansible_date_time.date }}_{{ ansible_date_time.time }}"
 
 - name: Create Backup Directory
   file:
@@ -27,7 +27,7 @@
 
 - name: Stat etcd v2 data directory
   stat:
-    path: "{{ etcd_data_dir }}/member" # /var/lib/etcd/member
+    path: "{{ etcd_data_dir }}/member"
   register: etcd_data_dir_member
 
 - name: Backup etcd v2 data

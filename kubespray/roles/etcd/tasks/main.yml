@@ -1,20 +1,5 @@
 ---
-# only etcd group
-- name: set architecture_groups
-  set_fact:
-    architecture_groups:
-      x86_64: amd64
-      aarch64: arm64
-
-- name: ansible_architecture_rename
-  set_fact:
-    host_architecture: >-
-      {%- if ansible_architecture in architecture_groups -%}
-      {{ architecture_groups[ansible_architecture] }}
-      {%- else -%}
-       {{ ansible_architecture }}
-      {% endif %}
-
+# on;y etcd
 - include_tasks: check_certs.yml
   when: cert_management == "script"
   tags:
@@ -50,7 +35,7 @@
     - master
     - network
 
-- include_tasks: "install_{{ etcd_deployment_type }}.yml" # etcd_deployment_type: docker
+- include_tasks: "install_{{ etcd_deployment_type }}.yml"
   when: is_etcd_master
   tags:
     - upgrade
@@ -60,16 +45,30 @@
 
 - include_tasks: refresh_config.yml
   when: is_etcd_master
- 
+
 - name: Restart etcd if certs changed
   service:
     name: etcd
     state: restarted
     enabled: yes
-  when: is_etcd_master and etcd_cluster_setup and etcd_secret_changed | default(false)
+  when: is_etcd_master and etcd_cluster_setup and etcd_secret_changed|default(false)
+
+- name: Restart etcd-events if certs changed
+  service:
+    name: etcd-events
+    state: restarted
+    enabled: yes
+  when: is_etcd_master and etcd_events_cluster_setup and etcd_secret_changed|default(false)
 
 # After etcd cluster is assembled, make sure that
 # initial state of the cluster is in `existing`
 # state instead of `new`.
 - include_tasks: refresh_config.yml
   when: is_etcd_master
+
+- name: Install etcdctl binary from etcd role
+  include_tasks: install_host.yml
+  vars:
+    etcd_cluster_setup: true
+  when:
+    - etcd_kubeadm_enabled

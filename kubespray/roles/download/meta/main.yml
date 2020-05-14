@@ -1,3 +1,2 @@
 ---
-
-allow_duplicates: true # 表示这个roles是可以被多次引用的(默认情况下多次引用只执行一次)
+allow_duplicates: true

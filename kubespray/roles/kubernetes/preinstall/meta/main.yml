@@ -1,7 +1,8 @@
 ---
 dependencies:
   - role: adduser
-    user: "{{ addusers.kube }}" # kube /sbin/nologin
-    when: not is_atomic
+    user: "{{ addusers.kube }}"
+    when:
+      - not is_fedora_coreos
     tags:
       - kubelet

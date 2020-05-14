@@ -98,8 +98,6 @@ fi
 if [ -e "$SSLDIR/ca-key.pem" ]; then
     # No pass existing CA
     rm -f ca.pem ca-key.pem
-else
-    mv *.pem ${SSLDIR}/
 fi
 
-#mv *.pem ${SSLDIR}/
+mv *.pem ${SSLDIR}/

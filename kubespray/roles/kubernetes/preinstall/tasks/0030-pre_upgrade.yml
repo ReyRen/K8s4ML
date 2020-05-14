@@ -1,8 +1,8 @@
 ---
-# k8s-cluster if no specified
+# k8s-master and etcd
 - name: "Pre-upgrade | check if old credential dir exists"
   stat:
-    path: "{{ inventory_dir }}/../credentials" # inventory_dir是内置变量/etc/ansible
+    path: "{{ inventory_dir }}/../credentials"
   delegate_to: localhost
   register: old_credential_dir
   become: no

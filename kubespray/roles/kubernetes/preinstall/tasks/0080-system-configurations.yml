@@ -1,4 +1,6 @@
 ---
+# k8s-cluster and etcd
+# Todo : selinux configuration
 - name: Disable IPv6 DNS lookup
   lineinfile:
     dest: /etc/gai.conf
@@ -7,13 +9,13 @@
     backup: yes
   when:
     - disable_ipv6_dns
-    - not ansible_os_family in ["CoreOS", "Container Linux by CoreOS"]
+    - not ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk"]
   tags:
     - bootstrap-os
 
 - name: Stat sysctl file configuration
   stat:
-    path: "{{ sysctl_file_path }}" # /etc/sysctl.d/99-sysctl.conf
+    path: "{{ sysctl_file_path }}"
   register: sysctl_file_stat
   tags:
     - bootstrap-os

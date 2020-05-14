@@ -1,5 +1,5 @@
 ---
-# k8s-cluster
+# k8s-cluster and etcd
 - name: Ensure old versions of Docker are not installed. | Debian
   apt:
     name: '{{ docker_remove_packages_apt }}'

@@ -1,6 +1,5 @@
 ---
-
-# 这里就是执行了查看本地docker images然后创建了/tmp/releases/images目录
+# k8s-cluster and etcd
 - name: download | Prepare working directories and variables
   import_tasks: prep_download.yml
   when:
@@ -8,11 +7,6 @@
   tags:
     - download
     - upload
-
-- name: Use docker for cri connection
-  set_fact:
-    cri_socket: /var/run/dockershim.sock
-  when: container_manager == 'docker'
 
 - name: download | Get kubeadm binary and list of required images
   include_tasks: prep_kubeadm_images.yml
@@ -23,7 +17,6 @@
     - download
     - upload
 
-# 目前没有执行，因为download中条件判断过不去
 - name: download | Download files / images
   include_tasks: "{{ include_file }}"
   with_dict: "{{ downloads | combine(kubeadm_images) }}"
@@ -36,18 +29,3 @@
     - item.value.enabled
     - (not (item.value.container | default(false))) or (item.value.container and download_container)
     - (download_run_once and inventory_hostname == download_delegate) or (group_names | intersect(download.groups) | length)
-
-# 目前没有执行，理由同上
-- name: download | Sync files / images from ansible host to nodes
-  include_tasks: "{{ include_file }}"
-  with_dict: "{{ downloads | combine(kubeadm_images) }}"
-  vars:
-    download: "{{ download_defaults | combine(item.value) }}"
-    include_file: "sync_{% if download.container %}container{% else %}file{% endif %}.yml"
-  when:
-    - not skip_downloads | default(false)
-    - download.enabled
-    - item.value.enabled
-    - download_run_once
-    - group_names | intersect(download.groups) | length
-    - not (inventory_hostname == download_delegate) # false, because download_delegate is kube-master

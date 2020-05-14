@@ -1,5 +1,4 @@
 ---
-# master
 - name: Kubernetes Apps | Wait for kube-apiserver
   uri:
     url: "{{ kube_apiserver_endpoint }}/healthz"
@@ -16,7 +15,7 @@
   command: which apparmor_parser
   register: apparmor_status
   when:
-    - podsecuritypolicy_enabled # false
+    - podsecuritypolicy_enabled
     - inventory_hostname == groups['kube-master'][0]
   failed_when: false
 
@@ -24,7 +23,7 @@
   set_fact:
     apparmor_enabled: "{{ apparmor_status.rc == 0 }}"
   when:
-    - podsecuritypolicy_enabled # false
+    - podsecuritypolicy_enabled
     - inventory_hostname == groups['kube-master'][0]
 
 - name: Kubernetes Apps | Render templates for PodSecurityPolicy
@@ -37,7 +36,7 @@
     - {file: psp-cr.yml, type: clusterrole, name: psp-cr}
     - {file: psp-crb.yml, type: rolebinding, name: psp-crb}
   when:
-    - podsecuritypolicy_enabled # false
+    - podsecuritypolicy_enabled
     - inventory_hostname == groups['kube-master'][0]
 
 - name: Kubernetes Apps | Add policies, roles, bindings for PodSecurityPolicy
@@ -64,7 +63,7 @@
     dest: "{{ kube_config_dir }}/node-crb.yml"
   register: node_crb_manifest
   when:
-    - rbac_enabled # enabled
+    - rbac_enabled
     - inventory_hostname == groups['kube-master'][0]
 
 - name: Apply workaround to allow all nodes with cert O=system:nodes to register

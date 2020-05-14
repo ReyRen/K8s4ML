@@ -1,67 +1,65 @@
 ---
+- name: Check ansible version
+  import_playbook: ansible_version.yml
 
-- hosts: localhost
+- hosts: all
   gather_facts: false
-  become: no
   tasks:
-    - name: "Check ansible version >= 2.7.8"
-      assert:
-        msg: "Ansible must be v2.7.8 or higher"
-        that: # ansible_version is kind of special variables in ansible
-              # Dictionary/map that contains information about the current running version of ansible, it has the following keys: full, major, minor, revision and string.
-          - ansible_version.string is version("2.7.8", ">=")
-      tags:
-        - check
-  vars: # ansible_connection is kind of special variables in ansible
-        # The connection plugin actually used for the task on the target host
-    ansible_connection: local
+    - name: "Set up proxy environment"
+      set_fact:
+        proxy_env:
+          http_proxy: "{{ http_proxy | default ('') }}"
+          HTTP_PROXY: "{{ http_proxy | default ('') }}"
+          https_proxy: "{{ https_proxy | default ('') }}"
+          HTTPS_PROXY: "{{ https_proxy | default ('') }}"
+          no_proxy: "{{ no_proxy | default ('') }}"
+          NO_PROXY: "{{ no_proxy | default ('') }}"
+      no_log: true
 
 - hosts: k8s-cluster:etcd # 这里表示的target是k8s-cluster和etcd组(不是&和!)
-                          # 因为这里我的etcd是一个节点并且是在master上，所以这里的效果和hosts: k8s-cluster是一样的
-  any_errors_fatal: "{{ any_errors_fatal | default(true) }}" # 有任务错误时，立即停止
+  # Dictionary/map that contains information about the current running version of ansible, it has the following keys: full, major, minor, revision and string.
+  strategy: linear
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   gather_facts: false
   roles:
-    - { role: kubespray-defaults} # 什么也每执行基本，因为skip_downloads是true
+    - { role: kubespray-defaults } # 什么也没执行基本，因为skip_downloads是true
     - { role: bootstrap-os, tags: bootstrap-os}
-
-#
 #到目前为之，安装了python, 按照inventory_name更改了各个主机的名字
 #剩下的什么也每做
-#
+
+- name: Gather facts
+  import_playbook: facts.yml
 
 - hosts: k8s-cluster:etcd
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults} # 用来使用一些其中的变量 skip_downlads is true
+    - { role: kubespray-defaults } # 用来使用一些其中的变量 skip_downlads is true
     - { role: kubernetes/preinstall, tags: preinstall }
     - { role: "container-engine", tags: "container-engine", when: deploy_container_engine|default(true) }
     - { role: download, tags: download, when: "not skip_downloads" }
-      # 这里的download是执行的, 因为kubespray-defaults中的skip_downloads true是在执行kubespray-defaults时， meta中强打进去的变量, 出了kubespray-defaults就失效了. 但是其他的vars是可以共享的（除了那些特殊打入的变量不能外部rols共享）
 
+# 这里的download是执行的, 因为kubespray-defaults中的skip_downloads true是
+# 在执行kubespray-defaults时， meta中强打进去的变量, 出了kubespray-defaults就失效
+# 了. 但是其他的vars是可以共享的（除了那些特殊打入的变量不能外部rols共享）
 
-#
-# 到目前为止，kubernetes配置文件目录, download中的file和container images
-# 都已经下载完毕
-#
-        
 - hosts: etcd
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - role: etcd
       tags: etcd
       vars:
         etcd_cluster_setup: true
-        etcd_events_cluster_setup: "{{ etcd_events_cluster_enabled }}" # false
-      when: not etcd_kubeadm_enabled | default(false)
+        etcd_events_cluster_setup: "{{ etcd_events_cluster_enabled }}"
+      when: not etcd_kubeadm_enabled| default(false)
 
-#
-# 到目前为止, etcd已经部署完成, 载体是docker，但是交给了host的systemd管理
-#
 - hosts: k8s-cluster
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - role: etcd
       tags: etcd
       vars:
@@ -69,50 +67,61 @@
         etcd_events_cluster_setup: false
       when: not etcd_kubeadm_enabled| default(false)
 
-# 以上这一块儿主要是将各自ca和各自node的key进行奋发拷贝/etc/ssl/etcd
-
-
 - hosts: k8s-cluster
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - { role: kubernetes/node, tags: node }
-
-# 以上部署好了kubelet,以及service文件，然后还有nginx当作node之间的proxy, 会以pod形式存在
-#
+  environment: "{{ proxy_env }}"
 
 - hosts: kube-master
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - { role: kubernetes/master, tags: master }
     - { role: kubernetes/client, tags: client }
     - { role: kubernetes-apps/cluster_roles, tags: cluster-roles }
 
-# 以上完成了master的init并且创建了一些角色
-#
-
 - hosts: k8s-cluster
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - { role: kubernetes/kubeadm, tags: kubeadm}
     - { role: network_plugin, tags: network }
+    - { role: kubernetes/node-label, tags: node-label }
 
-# up to now, 网络和节点都已经准备好了，集群已经初具规模
-#
 - hosts: kube-master[0]
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
+    - { role: kubespray-defaults }
     - { role: kubernetes-apps/rotate_tokens, tags: rotate_tokens, when: "secret_changed|default(false)" } # false
-    - { role: win_nodes/kubernetes_patch, tags: ["master", "win_nodes"]}
+    - { role: win_nodes/kubernetes_patch, tags: ["master", "win_nodes"] }
 
 - hosts: kube-master
+  gather_facts: False
   any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
   roles:
-    - { role: kubespray-defaults}
-    - { role: kubernetes-apps/network_plugin, tags: network } # used for upgrade
-    - { role: kubernetes-apps/policy_controller, tags: policy-controller } # Add calico-kube-controller to the policy_controller
+    - { role: kubespray-defaults }
+    - { role: kubernetes-apps/network_plugin, tags: network }
+    - { role: kubernetes-apps/policy_controller, tags: policy-controller } # # Add calico-kube-controller to the policy_controller
     - { role: kubernetes-apps/ingress_controller, tags: ingress-controller } # not execute
-    - { role: kubernetes-apps/external_provisioner, tags: external-provisioner } # nothing executed
+    - { role: kubernetes-apps/external_provisioner, tags: external-provisioner }
+
+- hosts: kube-master
+  gather_facts: False
+  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  roles:
+    - { role: kubespray-defaults }
+    - { role: kubernetes-apps, tags: apps }
+  environment: "{{ proxy_env }}"
+
+  #- hosts: k8s-cluster
+  #  gather_facts: False
+  #  any_errors_fatal: "{{ any_errors_fatal | default(true) }}"
+  #  roles:
+  #    - { role: kubespray-defaults }
+  #    - { role: kubernetes/preinstall, when: "dns_mode != 'none' and resolvconf_mode == 'host_resolvconf'", tags: resolvconf, dns_late: true }

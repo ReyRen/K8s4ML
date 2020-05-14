@@ -1,5 +1,4 @@
 ---
-# k8s-cluster
 - name: install | Copy kubeadm binary from download dir
   synchronize:
     src: "{{ local_release_dir }}/kubeadm-{{ kubeadm_version }}-{{ image_arch }}"
@@ -13,7 +12,6 @@
     - kubeadm
   when:
     - not inventory_hostname in groups['kube-master']
-      # kube-master is already installed to /usr/local/bin
 
 - name: install | Set kubeadm binary permissions
   file:
@@ -27,7 +25,7 @@
 
 - name: install | Copy kubelet binary from download dir
   synchronize:
-    src: "{{ local_release_dir }}/hyperkube-{{ kube_version }}-{{ image_arch }}"
+    src: "{{ local_release_dir }}/kubelet-{{ kube_version }}-{{ image_arch }}"
     dest: "{{ bin_dir }}/kubelet"
     compress: no
     perms: yes
@@ -35,13 +33,9 @@
     group: no
   delegate_to: "{{ inventory_hostname }}"
   tags:
-    - hyperkube
+    - kubelet
     - upgrade
-  notify: restart kubelet
-
-# 这里解释一下这个notify的执行时间，首先是在这个play(注意是整个play)执行完成后才会调用执行,
-# 但是为什么写在内部某个地方呢，是因为它会标注，这个地方的东西改变后，
-# 才会去在整个play执行完成后才去调用执行，否则也不执行
+  notify: Node | restart kubelet
 
 - name: install | Set kubelet binary permissions
   file:
@@ -49,27 +43,5 @@
     mode: "0755"
     state: file
   tags:
-    - hyperkube
-    - upgrade
-
-- name: install | Copy hyperkube binary from download dir
-  synchronize:
-    src: "{{ local_release_dir }}/hyperkube-{{ kube_version }}-{{ image_arch }}"
-    dest: "{{ bin_dir }}/hyperkube"
-    compress: no
-    perms: yes
-    owner: no
-    group: no
-  delegate_to: "{{ inventory_hostname }}"
-  tags:
-    - hyperkube
-    - upgrade
-
-- name: install | Set hyperkube binary permissions
-  file:
-    path: "{{ bin_dir }}/hyperkube"
-    mode: "0755"
-    state: file
-  tags:
-    - hyperkube
+    - kubelet
     - upgrade

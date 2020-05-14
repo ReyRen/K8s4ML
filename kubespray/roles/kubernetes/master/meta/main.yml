@@ -1,6 +1,6 @@
 ---
 dependencies:
   - role: kubernetes/tokens
-    when: kube_token_auth # false by default
+    when: kube_token_auth # false
     tags:
       - k8s-secrets

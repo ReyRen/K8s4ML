@@ -1,20 +1,25 @@
 ---
-# 把8.8.8.8和114.114.114.114(upstream_dns添加到resolv.conf中)
+- name: create temporary resolveconf cloud init file
+  command: cp -f /etc/resolv.conf "{{ resolvconffile }}"
+  when: ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk"]
+
 - name: Add domain/search/nameservers/options to resolv.conf
   blockinfile:
     path: "{{ resolvconffile }}"
     block: |-
-      {% for item in nameserverentries.split(',') -%}
+      {% for item in [domainentry] + [searchentries] + nameserverentries.split(',') -%}
       {{ item }}
       {% endfor %}
+      options ndots:{{ ndots }}
+      options timeout:2
+      options attempts:2
     state: present
     insertbefore: BOF
     create: yes
     backup: yes
     marker: "# Ansible entries {mark}"
-  notify: Preinstall | restart network
+  notify: Preinstall | propagate resolvconf to k8s components
 
-# 将添加的block之前的全部都删除
 - name: Remove search/domain/nameserver options before block
   replace:
     dest: "{{ item[0] }}"
@@ -24,7 +29,7 @@
   with_nested:
     - "{{ [resolvconffile, base|default(''), head|default('')] | difference(['']) }}"
     - [ 'search ', 'nameserver ', 'domain ', 'options ' ]
-  notify: Preinstall | restart network
+  notify: Preinstall | propagate resolvconf to k8s components
 
 - name: Remove search/domain/nameserver options after block
   replace:
@@ -36,4 +41,19 @@
   with_nested:
     - "{{ [resolvconffile, base|default(''), head|default('')] | difference(['']) }}"
     - [ 'search ', 'nameserver ', 'domain ', 'options ' ]
-  notify: Preinstall | restart network
+  notify: Preinstall | propagate resolvconf to k8s components
+
+
+- name: get temporary resolveconf cloud init file content
+  command: cat {{ resolvconffile }}
+  register: cloud_config
+  when: ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk"]
+
+- name: persist resolvconf cloud init file
+  template:
+    dest: "{{ resolveconf_cloud_init_conf }}"
+    src: resolvconf.j2
+    owner: root
+    mode: 0644
+  notify: Preinstall | update resolvconf for Container Linux by CoreOS
+  when: ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk"]

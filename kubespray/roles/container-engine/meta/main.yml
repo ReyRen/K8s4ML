@@ -1,6 +1,5 @@
 ---
-
-# k8s-cluster
+# k8s-cluster and etcd
 dependencies:
   - role: container-engine/docker
     when:

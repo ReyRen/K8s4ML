@@ -1,4 +1,13 @@
 ---
+# k8s-cluster and etcd
+- name: check if fedora coreos
+  stat:
+    path: /run/ostree-booted
+  register: ostree
+
+- name: set is_ostree
+  set_fact:
+    is_ostree: "{{ ostree.stat.exists }}"
 
 - name: gather os specific variables
   include_vars: "{{ item }}"
@@ -27,10 +36,10 @@
 - name: check for minimum kernel version
   fail:
     msg: >
-      docker requires a minimum kernel version of
-      {{ docker_kernel_min_version }} on
-      {{ ansible_distribution }}-{{ ansible_distribution_version }}
-  when: (not ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "ClearLinux"]) and (ansible_kernel is version(docker_kernel_min_version, "<"))
+          docker requires a minimum kernel version of
+          {{ docker_kernel_min_version }} on
+          {{ ansible_distribution }}-{{ ansible_distribution_version }}
+  when: (not ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "ClearLinux"]) and (ansible_kernel is version(docker_kernel_min_version, "<"))
   tags:
     - facts
 
@@ -47,15 +56,40 @@
   retries: 4
   delay: "{{ retry_stagger | d(3) }}"
   with_items: "{{ docker_repo_key_info.repo_keys }}"
-  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse", "ClearLinux"] or is_atomic)
+  when: not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "RedHat", "Suse", "ClearLinux"] or is_ostree)
 
 - name: ensure docker-ce repository is enabled
-  action: "{{ docker_repo_info.pkg_repo }}" # apt_repository deb https://download.docker.com/linux/ubuntu XX stable
+  action: "{{ docker_repo_info.pkg_repo }}"
   args:
     repo: "{{ item }}"
     state: present
   with_items: "{{ docker_repo_info.repos }}"
-  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "RedHat", "Suse", "ClearLinux"] or is_atomic) and (docker_repo_info.repos|length > 0)
+  when: not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "RedHat", "Suse", "ClearLinux"] or is_ostree) and (docker_repo_info.repos|length > 0)
+
+- name: ensure docker-engine repository public key is installed
+  action: "{{ dockerproject_repo_key_info.pkg_key }}"
+  args:
+    id: "{{ item }}"
+    url: "{{ dockerproject_repo_key_info.url }}"
+    state: present
+  register: keyserver_task_result
+  until: keyserver_task_result is succeeded
+  retries: 4
+  delay: "{{ retry_stagger | d(3) }}"
+  with_items: "{{ dockerproject_repo_key_info.repo_keys }}"
+  when:
+    - not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "RedHat", "Suse", "ClearLinux"] or is_ostree)
+    - use_docker_engine is defined and use_docker_engine
+
+- name: ensure docker-engine repository is enabled
+  action: "{{ dockerproject_repo_info.pkg_repo }}"
+  args:
+    repo: "{{ item }}"
+    state: present
+  with_items: "{{ dockerproject_repo_info.repos }}"
+  when:
+    - use_docker_engine is defined and use_docker_engine
+    - not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "RedHat", "Suse", "ClearLinux"] or is_ostree) and (dockerproject_repo_info.repos|length > 0)
 
 - name: ensure docker packages are installed
   action: "{{ docker_package_info.pkg_mgr }}"
@@ -71,7 +105,7 @@
   delay: "{{ retry_stagger | d(3) }}"
   with_items: "{{ docker_package_info.pkgs }}"
   notify: restart docker
-  when: not (ansible_os_family in ["CoreOS", "Container Linux by CoreOS", "ClearLinux"] or is_atomic) and (docker_package_info.pkgs|length > 0)
+  when: not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "ClearLinux"] or is_ostree) and (docker_package_info.pkgs|length > 0)
   ignore_errors: true
 
 - name: get available packages on Ubuntu
@@ -94,13 +128,6 @@
     name: docker-ce
     selection: hold
   when: ansible_os_family in ["Debian"]
-
-# make the http repository can be pass
-- name: Make sure the daemon file exists
-  template:
-    src: "daemon.json.j2"
-    dest: "/etc/docker/daemon.json"
-  notify: restart docker
 
 - name: ensure docker started, remove our config if docker start failed and try again
   block:
@@ -130,6 +157,14 @@
   command: "docker version -f '{{ '{{' }}.Client.Version{{ '}}' }}'"
   register: installed_docker_version
   changed_when: false
+
+- name: check minimum docker version for docker_dns mode. You need at least docker version >= 1.12 for resolvconf_mode=docker_dns
+  fail:
+    msg: "You need at least docker version >= 1.12 for resolvconf_mode=docker_dns"
+  when: >
+        dns_mode != 'none' and
+        resolvconf_mode == 'docker_dns' and
+        installed_docker_version.stdout is version('1.12', '<')
 
 # Install each plugin using a looped include to make error handling in the included task simpler.
 - include_tasks: docker_plugin.yml

@@ -1,5 +1,4 @@
 ---
-
 - name: extract_file | Unpacking archive
   unarchive:
     src: "{{ download.dest }}"
@@ -8,4 +7,4 @@
     mode: "{{ download.mode | default(omit) }}"
     copy: no
   when:
-  - download.unarchive | default(false)
+    - download.unarchive | default(false)

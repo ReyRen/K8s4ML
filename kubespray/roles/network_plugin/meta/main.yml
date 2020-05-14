@@ -1,5 +1,4 @@
 ---
-# k8s-cluster
 dependencies:
   - role: network_plugin/calico
     when: kube_network_plugin == 'calico'

@@ -10,12 +10,13 @@ dns_late: false
 common_required_pkgs:
   - "{{ (ansible_distribution == 'openSUSE Tumbleweed') | ternary('openssl-1_1', 'openssl') }}"
   - curl
-  - vim
   - rsync
   - socat
+  - vim
   - unzip
   - e2fsprogs
   - xfsprogs
+  - ebtables
 
 # Set to true if your network does not support IPv6
 # This maybe necessary for pulling Docker images from
@@ -34,8 +35,6 @@ resolveconf_cloud_init_conf: /etc/resolveconf_cloud_init.conf
 
 # All inventory hostnames will be written into each /etc/hosts file.
 populate_inventory_to_hosts_file: true
-
-preinstall_selinux_state: permissive
 
 sysctl_file_path: "/etc/sysctl.d/99-sysctl.conf"
 

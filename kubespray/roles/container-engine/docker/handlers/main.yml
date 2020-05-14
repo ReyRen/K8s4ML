@@ -3,6 +3,7 @@
   command: /bin/true
   notify:
     - Docker | reload systemd
+    - Docker | reload docker.socket
     - Docker | reload docker
     - Docker | wait for docker
 
@@ -10,12 +11,17 @@
   systemd:
     daemon_reload: true
 
+- name: Docker | reload docker.socket
+  service:
+    name: docker.socket
+    state: restarted
+  when: ansible_os_family in ['Coreos', 'CoreOS', 'Container Linux by CoreOS', 'Flatcar', 'Flatcar Container Linux by Kinvolk'] or is_fedora_coreos
+
 - name: Docker | reload docker
   service:
     name: docker
     state: restarted
 
-# 验证docker是否正常启动了
 - name: Docker | wait for docker
   command: "{{ docker_bin_dir }}/docker images"
   register: docker_ready

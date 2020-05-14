@@ -1,10 +1,10 @@
 ---
 - name: Make sure the users directory exits
   file:
-    path: "{{ kube_users_dir }}" # /etc/kubernetes/users
+    path: "{{ kube_users_dir }}"
     state: directory
     mode: o-rwx
-    group: "{{ kube_cert_group }}" # kube-cert
+    group: "{{ kube_cert_group }}"
 
 - name: Populate users for basic auth in API
   template:
