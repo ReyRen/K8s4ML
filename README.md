@@ -23,10 +23,15 @@ Move all necessary container images from gcr or others to "my docker hub", which
 
 ## 2020.5.15
 因为在与kubespray社区一些列的躺坑和讨论之后，最终决定使用最新的kuberspray进行
+
 https://github.com/kubernetes-sigs/kubespray/issues/6131
+
 https://github.com/kubernetes-sigs/kubespray/issues/6137
+
 https://github.com/ansible/ansible/issues/69247
+
 https://github.com/docker/distribution/issues/3162
+
 现阶段已经将集群调试成功了
 **Reset the Cluster**
 Sometimes a cluster will get into a bad state - perhaps one where certs are misconfigured or different across nodes. When this occurs it's often helpful to completely reset the cluster. To accomplish this, run the remove-node.yml playbook for all k8s nodes...
