@@ -33,6 +33,7 @@ https://github.com/ansible/ansible/issues/69247
 https://github.com/docker/distribution/issues/3162
 
 现阶段已经将集群调试成功了
+
 **Reset the Cluster**
 Sometimes a cluster will get into a bad state - perhaps one where certs are misconfigured or different across nodes. When this occurs it's often helpful to completely reset the cluster. To accomplish this, run the remove-node.yml playbook for all k8s nodes...
 ```
@@ -41,3 +42,16 @@ ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename
 ```
 NOTE: There is also a Kubespray reset.yml playbook, but this does not do a complete tear-down of the cluster. Certificates and other artifacts might persist on each host, leading to a problematic redeployment in the future. The remove-node.yml playbook runs reset.yml as part of the process.
 
+
+## 2020.5.15
+**Removing Nodes**
+Removing nodes can be performed with Kubespray's `remove-node.yml` playbook and supplying the node names as extra vars...
+```
+# NOTE: If SSH requires a password, add: `-k`
+# NOTE: If sudo on remote machine requires a password, add: `-K`
+# NOTE: If SSH user is different than current user, add: `-u ubuntu`
+ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename1"
+```
+This will drain `nodename0` & `nodename1`, stop Kubernetes services, delete certificates, and finally execute the kubectl command to delete the nodes.
+
+More information no the topic may be found in the (Kubespray docs)[ttps://github.com/kubernetes-sigs/kubespray/blob/master/docs/getting-started.md#remove-nodes]
