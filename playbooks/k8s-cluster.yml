@@ -41,3 +41,40 @@
 - include: ../kubespray/cluster.yml
   tags:
     - k8s
+
+# Disable swap (required for k8s), kubespray method doesn't quite cut it
+- hosts: k8s-cluster
+  become: true
+  tasks:
+    - name: remove swap from fstab
+      lineinfile: path=/etc/fstab regexp='swap' state=absent
+    - name: disable swap
+      command: swapoff -a
+  tags:
+    - swap
+
+# Install NVIDIA driver on GPU servers
+- include: nvidia-driver.yml hostlist=kube-node
+  tags:
+    - nvidia
+  when: deepops_gpu_operator_enabled | default('false') | bool == false
+
+# Install NVIDIA container runtime on GPU servers
+- include: nvidia-docker.yml hostlist=kube-node
+  tags:
+    - nvidia
+  when: deepops_gpu_operator_enabled | default('false') | bool == false
+
+# Install k8s GPU device plugin
+- include: k8s-gpu-plugin.yml
+  tags:
+    - nvidia
+  when: deepops_gpu_operator_enabled | default('false') | bool == false
+
+# Install NVIDIA GPU Operator
+- include: nvidia-gpu-operator.yml
+  tags:
+    - nvidia
+  when: deepops_gpu_operator_enabled | default('false') | bool == true
+
+

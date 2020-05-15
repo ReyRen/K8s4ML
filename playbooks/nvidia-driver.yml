@@ -1,0 +1,27 @@
+---
+# all by default
+- hosts: "{{ hostlist | default('all') }}"
+  become: true
+  tasks:
+    - name: Check for DGX packages
+      stat:
+        path: /etc/dgx-release
+      register: is_dgx
+
+    - name: install custom facts
+      include_role:
+        name: facts
+
+    - name: install nvidia driver
+      include_role:
+        name: nvidia.nvidia_driver # which is in the galaxy-roles
+      when:
+        - ansible_local['gpus']['count']
+        - is_dgx.stat.exists == False
+
+    - name: test nvidia-smi
+      command: nvidia-smi
+      changed_when: false
+      when:
+        - ansible_local['gpus']['count']
+        - is_dgx.stat.exists == False

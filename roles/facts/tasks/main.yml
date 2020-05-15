@@ -1,0 +1,23 @@
+---
+# all
+- name: apt install pciutils
+  apt: name=pciutils update_cache=yes
+  when: ansible_os_family == 'Debian'
+  environment: "{{proxy_env if proxy_env is defined else {}}}"
+
+- name: create fact directory
+  file:
+    path: /etc/ansible/facts.d
+    state: directory
+    mode: 0755
+
+- name: custom facts
+  copy:
+    src: "{{ item }}"
+    dest: /etc/ansible/facts.d/
+    mode: 0755
+  with_fileglob:
+    - '*'
+
+- name: regather local facts
+  setup: filter=ansible_local

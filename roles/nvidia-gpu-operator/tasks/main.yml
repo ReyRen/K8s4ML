@@ -1,0 +1,21 @@
+---
+- name: install GPU operator helm chart
+  helm:
+    host: "{{ tiller_host }}"
+    chart:
+      name: "{{ gpu_operator_chart_name }}" # gpu-operator
+      version: "{{ gpu_operator_chart_version }}" # 1.0.0
+      source:
+        type: repo
+        location: "{{ gpu_operator_helm_repo }}" # https://nvidia.github.io/gpu-operator
+    state: present
+    name: "{{ gpu_operator_release_name }}" # nvidia-gpu-operator
+
+- name: create GPU operator special resource definition (Ubuntu)
+  k8s:
+    state: present
+    definition: "{{ lookup('url', gpu_operator_custom_resource_url, split_lines=False) }}"
+  run_once: true
+  environment:
+    PYTHONHOME: "{{ deepops_venv }}"
+  when: ansible_distribution == "Ubuntu"
