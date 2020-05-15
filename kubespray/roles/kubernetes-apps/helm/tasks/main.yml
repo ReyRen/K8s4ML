@@ -1,9 +1,10 @@
 ---
+# master
 - name: Helm | Make sure HELM_HOME directory exists
-  file: path={{ helm_home_dir }} state=directory
+  file: path={{ helm_home_dir }} state=directory # /root/.helm
 
 - name: Helm | Set up helm launcher
-  include_tasks: "install_{{ helm_deployment_type }}.yml"
+  include_tasks: "install_{{ helm_deployment_type }}.yml" # install_host.yml
 
 - name: Helm | Lay Down Helm Manifests (RBAC)
   template:
@@ -37,12 +38,12 @@
 - name: Helm | Set up TLS
   include_tasks: "gen_helm_tiller_certs.yml"
   when:
-    - tiller_enable_tls
+    - tiller_enable_tls # false
     - helm_version is version('v3.0.0', '<')
 
 - name: Helm | Install client on all masters
   command: >
-    {{ bin_dir }}/helm init --tiller-namespace={{ tiller_namespace }}
+    {{ bin_dir }}/helm init --tiller-namespace={{ tiller_namespace }} # kube-system
     {% if helm_skip_refresh %} --skip-refresh{% endif %}
     {% if helm_stable_repo_url is defined %} --stable-repo-url {{ helm_stable_repo_url }}{% endif %}
     --client-only
@@ -106,15 +107,7 @@
   environment: "{{ proxy_env }}"
   when:
     - helm_version is version('v3.0.0', '>=')
-    - helm_stable_repo_url is defined
-
-- name: Make sure bash_completion.d folder exists
-  file:
-    name: "/etc/bash_completion.d/"
-    state: directory
-  when:
-    - ((helm_container is defined and helm_container.changed) or (helm_task_result is defined and helm_task_result.changed))
-    - ansible_os_family in ["ClearLinux"]
+    - helm_stable_repo_url is defined # false
 
 - name: Helm | Set up bash completion
   shell: "umask 022 && {{ bin_dir }}/helm completion bash >/etc/bash_completion.d/helm.sh"
