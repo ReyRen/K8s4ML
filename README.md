@@ -1,8 +1,10 @@
 # K8s4ML
 K8s platform specialized in Machine learning
 
+## 2020.4.13
 持续更新代码(使用deepos & kubespary........)
 
+## 2020.4.25
 目前kubelow v1.0社区是不兼容kubernetes v1.16+的, [Minimum system requirements](https://www.kubeflow.org/docs/started/k8s/overview/#minimum-system-requirements)
 但是在[kubeflow-project-card](https://github.com/orgs/kubeflow/projects/36#card-36657274)可以看到其实是将要release的Kubeflow v1.1是会对kubernetes v1.17和v1.16双双支持. 
 
@@ -18,3 +20,19 @@ docker images|grep "redis关键字"|awk '{print $1":"$2}'|xargs docker rmi
 ```
 
 Move all necessary container images from gcr or others to "my docker hub", which is in the private NAS platform 172.18.12.16:4000/XXX:tag. Fucking the Firewall....
+
+## 2020.5.15
+因为在与kubespray社区一些列的躺坑和讨论之后，最终决定使用最新的kuberspray进行
+https://github.com/kubernetes-sigs/kubespray/issues/6131
+https://github.com/kubernetes-sigs/kubespray/issues/6137
+https://github.com/ansible/ansible/issues/69247
+https://github.com/docker/distribution/issues/3162
+现阶段已经将集群调试成功了
+**Reset the Cluster**
+Sometimes a cluster will get into a bad state - perhaps one where certs are misconfigured or different across nodes. When this occurs it's often helpful to completely reset the cluster. To accomplish this, run the remove-node.yml playbook for all k8s nodes...
+```
+# NOTE: Explicitly list ALL nodes in the cluster. Do not use an ansible group name such as k8s-cluster.
+ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename1,<...>"
+```
+NOTE: There is also a Kubespray reset.yml playbook, but this does not do a complete tear-down of the cluster. Certificates and other artifacts might persist on each host, leading to a problematic redeployment in the future. The remove-node.yml playbook runs reset.yml as part of the process.
+
