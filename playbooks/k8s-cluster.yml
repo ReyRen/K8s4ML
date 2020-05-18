@@ -71,10 +71,10 @@
     - nvidia
   when: deepops_gpu_operator_enabled | default('false') | bool == false
 
+
+# The GPU-operator is good, but for some reason, my nfd(node feature discovery)# always cannot find out GPU lable on node. So, I decide to use traditional way
 # Install NVIDIA GPU Operator
 - include: nvidia-gpu-operator.yml
   tags:
     - nvidia
   when: deepops_gpu_operator_enabled | default('false') | bool == true
-
-

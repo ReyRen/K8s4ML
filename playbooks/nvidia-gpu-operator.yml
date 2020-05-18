@@ -49,6 +49,8 @@
         PYTHONHOME: "{{ deepops_venv }}"
       register: tiller_service_ubuntu
       when: ansible_distribution == "Ubuntu"
+  tags:
+    - always  
 
 # Prepare compute nodes for GPU operator
 - hosts: kube-node
@@ -64,12 +66,14 @@
 # GPU operator
 - hosts: kube-master
   become: yes
+  collections:
+    - community.kubernetes
   tasks:
     - name: Install helm chart for GPU operator (Ubuntu)
       include_role:
         name: nvidia-gpu-operator
-      vars:
-        tiller_host: "{{ tiller_service_ubuntu.resources[0].spec.clusterIP }}"
+        #vars:
+#        tiller_host: "{{ tiller_service_ubuntu.resources[0].spec.clusterIP }}"
       run_once: true
       when: ansible_distribution == "Ubuntu"
   tags:

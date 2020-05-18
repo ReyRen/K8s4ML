@@ -11,11 +11,12 @@
 
 - name: create location for K8s4ML files
   file:
-    path: "{{ k8s4ml_dir }}" # /opt/k8s4ml
+    path: "{{ deepops_dir }}"
     state: directory
 
 - name: install openshift python client for k8s_raw module
   pip:
     name: openshift
-    virtualenv: "{{ k8s4ml_venv }}"
+    virtualenv: "{{ deepops_venv }}"
   when: ansible_distribution == 'Ubuntu'
+  environment: "{{proxy_env if proxy_env is defined else {}}}"

@@ -35,6 +35,7 @@ https://github.com/docker/distribution/issues/3162
 现阶段已经将集群调试成功了
 
 **Reset the Cluster**
+
 Sometimes a cluster will get into a bad state - perhaps one where certs are misconfigured or different across nodes. When this occurs it's often helpful to completely reset the cluster. To accomplish this, run the remove-node.yml playbook for all k8s nodes...
 ```
 # NOTE: Explicitly list ALL nodes in the cluster. Do not use an ansible group name such as k8s-cluster.
@@ -45,6 +46,7 @@ NOTE: There is also a Kubespray reset.yml playbook, but this does not do a compl
 
 ## 2020.5.15
 **Removing Nodes**
+
 Removing nodes can be performed with Kubespray's `remove-node.yml` playbook and supplying the node names as extra vars...
 ```
 # NOTE: If SSH requires a password, add: `-k`

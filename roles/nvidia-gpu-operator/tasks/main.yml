@@ -1,7 +1,7 @@
 ---
 - name: install GPU operator helm chart
   helm:
-    host: "{{ tiller_host }}"
+    host: "{{ tiller_host }}" # localhost
     chart:
       name: "{{ gpu_operator_chart_name }}" # gpu-operator
       version: "{{ gpu_operator_chart_version }}" # 1.0.0
@@ -10,6 +10,24 @@
         location: "{{ gpu_operator_helm_repo }}" # https://nvidia.github.io/gpu-operator
     state: present
     name: "{{ gpu_operator_release_name }}" # nvidia-gpu-operator
+
+#- name: install GPU operator helm chart | add repo
+#  raw: helm repo add nvidia https://nvidia.github.io/gpu-operator
+#  register: helm_repo_added
+#  failed_when: false
+#  changed_when: false
+#
+#- name: install GPU operator helm chart | update repo
+#  raw: helm repo update
+#  register: helm_repo_updated
+#  failed_when: false
+#  changed_when: false
+#
+#- name: install GPU operator helm chart | install
+
+
+
+
 
 - name: create GPU operator special resource definition (Ubuntu)
   k8s:

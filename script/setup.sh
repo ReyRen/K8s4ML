@@ -123,6 +123,7 @@ if [ $? -eq 0 ] ; then
         . ${SCRIPT_DIR}/proxy.sh && ansible-galaxy install --force -r requirements.yml >/dev/null
     else
         ansible-galaxy install --force -r requirements.yml >/dev/null
+	#ansible-galaxy collection install community.kubernetes >/dev/null
     fi
 
 

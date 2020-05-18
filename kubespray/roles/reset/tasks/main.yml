@@ -1,12 +1,5 @@
 ---
-
-- name: reset | include file with pre-reset tasks specific to the network_plugin if exists
-  include_tasks: "{{ (role_path + '/../network_plugin/' + kube_network_plugin + '/tasks/pre-reset.yml') | realpath  }}"
-  when:
-    - kube_network_plugin in ['contiv']
-  tags:
-    - network
-
+# node
 - name: reset | stop services
   service:
     name: "{{ item }}"
@@ -64,50 +57,6 @@
   when: docker_dropins_removed.changed and container_manager == "docker"
   tags:
     - docker
-
-- name: reset | stop all cri containers
-  shell: "crictl ps -aq | xargs -r crictl -t 60s stop"
-  register: remove_all_cri_containers
-  retries: 5
-  until: remove_all_cri_containers.rc == 0
-  delay: 5
-  tags:
-    - crio
-    - containerd
-  when: container_manager in ["crio", "containerd"]
-
-- name: reset | remove all cri containers
-  shell: "crictl ps -aq | xargs -r crictl -t 60s rm"
-  register: remove_all_cri_containers
-  retries: 5
-  until: remove_all_cri_containers.rc == 0
-  delay: 5
-  tags:
-    - crio
-    - containerd
-  when: container_manager in ["crio", "containerd"] and deploy_container_engine|default(true)
-
-- name: reset | stop all cri pods
-  shell: "crictl pods -q | xargs -r crictl -t 60s stopp"
-  register: remove_all_cri_containers
-  retries: 5
-  until: remove_all_cri_containers.rc == 0
-  delay: 5
-  tags:
-    - crio
-    - containerd
-  when: container_manager in ["crio", "containerd"]
-
-- name: reset | remove all cri pods
-  shell: "crictl pods -q | xargs -r crictl -t 60s rmp"
-  register: remove_all_cri_containers
-  retries: 5
-  until: remove_all_cri_containers.rc == 0
-  delay: 5
-  tags:
-    - crio
-    - containerd
-  when: container_manager in ["crio", "containerd"]
 
 - name: reset | stop etcd services
   service:
