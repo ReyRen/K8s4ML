@@ -3,8 +3,8 @@ kind: Job
 metadata:
   name: cluster-gpu-tests
 spec:
-  parallelism: 4 # DYNAMIC_PARALLELISM
-  completions: 4 # DYNAMIC_COMPLETIONS
+  parallelism: 1 # DYNAMIC_PARALLELISM
+  completions: 1 # DYNAMIC_COMPLETIONS
   backoffLimit: 5
   template:
     spec:
