@@ -10,7 +10,7 @@ TODO: Do this with Ansible
 
 #import requests
 import json
-import urllib2
+#import urllib3
 import logging
 import yaml
 import os
@@ -29,18 +29,29 @@ def get_images(url='https://api.ngc.nvidia.com/v2/repos', number_tags=5):
     images = []
 
     # Get response from Registry
-    try:
-        req = urllib2.Request(url)
-        repos = urllib2.urlopen(req)
-    except Exception as e:
-        logging.error("Failed to get repos {}".format(e)) # Fail on non-200 status code or other issues
-        return 1
+#    try:
+#        http = urllib3.PoolManager()
+#
+#       # req = urllib3.Request(url)
+#       # repos = urllib3.urlopen(req)
+#    except Exception as e:
+#        logging.error("Failed to get repos {}".format(e)) # Fail on non-200 status code or other issues
+#        return 1
 
     # Parse Registry response
     try:
-        repos = json.loads(repos.read())
+        print('json.loads(repos.read())')
+        #tmp_ = repos.read()
+        #print('repos.read() SUCCESS')
+        #repos = json.loads(repos.read())
+#        repos = json.loads(http.request('GET', 'http://httpbin.org/ip').data.decode('utf-8'))
+        repos = open('/root/repos.json', 'r')
+        print('open SUCCESS')
+        repos = json.load(repos)
+        print('json.loads(repos.read()) end')
     except Exception as e:
         logging.error("Failed to parse NGC response")
+        logging.error(e.message)
         return 1
     if 'repositories' not in repos:
         loggging.warn("no repositories listed")

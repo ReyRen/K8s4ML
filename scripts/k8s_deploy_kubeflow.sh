@@ -20,14 +20,17 @@ export KUBEFLOW_DEL_SCRIPT="${KF_DIR}/deepops-delete-kubeflow.sh"
 
 # Download URLs and versions
 export KFCTL_FILE=kfctl_v1.0-rc.1-0-g963c787_linux.tar.gz
-export KFCTL_URL="https://github.com/kubeflow/kfctl/releases/download/v1.0-rc.1/${KFCTL_FILE}"
+#export KFCTL_URL="https://github.com/kubeflow/kfctl/releases/download/v1.0-rc.1/${KFCTL_FILE}"
+export KFCTL_URL="http://reyren.cn:8001/${KFCTL_FILE}"
 
 # Config 1: https://www.kubeflow.org/docs/started/k8s/kfctl-existing-arrikto/
-export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/b37bad9eded2c47c54ce1150eb9e6edbfb47ceda/kfdef/kfctl_existing_arrikto.0.7.1.yaml"
+#export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/b37bad9eded2c47c54ce1150eb9e6edbfb47ceda/kfdef/kfctl_existing_arrikto.0.7.1.yaml"
+export CONFIG_URI="http://reyren.cn:8001/kfctl_existing_arrikto.0.7.1.yaml"
 export CONFIG_FILE="${KF_DIR}/kfctl_existing_arrikto.0.7.1.yaml"
 
 # Config 2: https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/
-export NO_AUTH_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v0.7-branch/kfdef/kfctl_k8s_istio.0.7.0.yaml"
+#export NO_AUTH_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v0.7-branch/kfdef/kfctl_k8s_istio.0.7.0.yaml"
+export NO_AUTH_CONFIG_URI="http://reyren.cn:8001/kfctl_k8s_istio.0.7.0.yaml"
 export NO_AUTH_CONFIG_FILE="${KF_DIR}/kfctl_k8s_istio.0.7.0.yaml"
 
 
@@ -144,9 +147,11 @@ function stand_up() {
   # Initialize and apply the Kubeflow project using the specified config. We do this in two steps to allow a chance to customize the config
   cd ${KF_DIR}
   ${KFCTL} build -V -f ${CONFIG_URI}
+  echo "build finished"
 
   # Update Kubeflow with the NGC containers and NVIDIA configurations
   ${SCRIPT_DIR}/update_kubeflow_config.py
+  echo "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
 
   # XXX: Add potential CONFIG customizations here before applying
   ${KFCTL} apply -V -f ${CONFIG_FILE}

@@ -8,14 +8,19 @@
 HELM_ROOK_CHART_REPO="${HELM_ROOK_CHART_REPO:-https://charts.rook.io/release}"
 HELM_ROOK_CHART_VERSION="${HELM_ROOK_CHART_VERSION:-v1.1.1}"
 
-./scripts/install_helm.sh
+#./scripts/install_helm.sh
 
 # https://github.com/rook/rook/blob/master/Documentation/helm-operator.md
 helm repo add rook-release "${HELM_ROOK_CHART_REPO}"
+helm repo update
+if $(kubectl get namespaces | grep rook-ceph) >/dev/null 2>&1 ; then
+	kubectl create namespace rook-ceph
+else
+	echo "namespace/rook-ceph already exists!"
+fi
 
 # We need to dynamically set up Helm args, so let's use an array
 helm_install_args=("--namespace" "rook-ceph"
-                   "--name" "rook-ceph"
 		   "--version" "${HELM_ROOK_CHART_VERSION}"
 )
 
@@ -26,8 +31,17 @@ fi
 
 # Install rook-ceph
 if ! helm status rook-ceph >/dev/null 2>&1 ; then
-    helm install "${helm_install_args[@]}" rook-release/rook-ceph
+    helm install rook-ceph "${helm_install_args[@]}" rook-release/rook-ceph
 fi
+
+###################ERROR FIX###################
+# helm list --all --all-namespaces
+# helm uninstall <release-name> -n <namespace>
+# helm template <NAME> <CHART> --namespace <NAMESPACE> | kubectl delete -f -
+# like: helm template happy-panda stable/mariadb --namespace kube-system | kubectl delete -f -
+# Then reinstall
+###################ERROR FIX###################
+
 
 if kubectl -n rook-ceph get pod -l app=rook-ceph-tools 2>&1 | grep "No resources found." >/dev/null 2>&1; then
     sleep 5
