@@ -121,3 +121,10 @@ The script is in `K8s4ml/scripts/k8s_deploy_pvs.sh`
 
 
 Restore tons of images, digests and files in subnet NAS and reyren.cn:8001. This work really make me crazy :)
+
+**How to save all Docker images and copy to another machine**
+
+```
+docker save $(docker images --format '{{.Repository}}:{{.Tag}}') -o allinone.tar
+docker load -i allinone.tar
+```
