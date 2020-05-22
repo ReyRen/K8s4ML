@@ -55,6 +55,7 @@ software_extra_packages:
   - tmux
   - vim
   - wget
+  - nfs-common
   - build-essential
   - linux-tools-generic
   - "{{ 'linux-headers-' + ansible_kernel }}"

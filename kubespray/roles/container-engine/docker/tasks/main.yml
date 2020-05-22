@@ -182,3 +182,26 @@
     state: started
   with_items:
     - docker
+
+      #- name: Download the packed K8s4ml-images from reyren.cn:8001
+      #  shell: "wget -c reyren.cn:8001/K8s4ml-images.tar -O /root/K8s4ml-images.tar"
+      #  retries: 4
+      #  delay: "{{ retry_stagger | default(5) }}"
+      #
+      #- name: Load docker all K8s4ml-images
+      #  shell: "docker load -i /root/K8s4ml-images.tar"
+      #  retries: 4
+      #  delay: "{{ retry_stagger | default(5) }}"
+- name: mkdir mount dir
+  shell: "mkdir -p /root/K8s4ml-images-mountDir"
+
+- name: Mount subnet NAS dir
+  shell: "mount -t nfs 192.168.0.100:/volume1/2035-data-center /root/K8s4ml-images-mountDir"
+
+- name: Load docker all K8s4ml-images
+  shell: "docker load -i /root/K8s4ml-images-mountDir/k8s4ml/K8s4ml-images.tar"
+  retries: 4
+  delay: "{{ retry_stagger | default(5) }}"
+
+- name: Umount subnet NAS dir
+  shell: "umount /root/K8s4ml-images-mountDir && rm -rf /root/K8s4ml-images-mountDir"

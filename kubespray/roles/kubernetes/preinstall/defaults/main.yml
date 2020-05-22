@@ -11,6 +11,7 @@ common_required_pkgs:
   - "{{ (ansible_distribution == 'openSUSE Tumbleweed') | ternary('openssl-1_1', 'openssl') }}"
   - curl
   - rsync
+  - nfs-common
   - socat
   - vim
   - unzip
