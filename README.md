@@ -1,6 +1,7 @@
 # K8s4ML
 K8s platform specialized in Machine learning
 
+
 ## 2020.4.13
 持续更新代码(使用deepos & kubespary........)
 
@@ -57,3 +58,18 @@ ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename
 This will drain `nodename0` & `nodename1`, stop Kubernetes services, delete certificates, and finally execute the kubectl command to delete the nodes.
 
 More information no the topic may be found in the (Kubespray docs)[ttps://github.com/kubernetes-sigs/kubespray/blob/master/docs/getting-started.md#remove-nodes]
+
+## 2020.5.22
+
+**kubeflow** it doesn't work for now, unfortunately. I will update later. 
+
+The script is in `K8s4ml/scripts/k8s_deploy_kubeflow.sh`
+
+**monitor**
+
+The script is in `K8s4ml/scripts/k8s_deploy_monitoring.sh`
+
+**pvs**
+
+The script is in `K8s4ml/scripts/k8s_deploy_pvs.sh`
+
