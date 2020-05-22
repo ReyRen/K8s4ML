@@ -119,3 +119,5 @@ The script is in `K8s4ml/scripts/k8s_deploy_monitoring.sh`
 
 The script is in `K8s4ml/scripts/k8s_deploy_pvs.sh`
 
+
+Restore tons of images, digests and files in subnet NAS and reyren.cn:8001. This work really make me crazy :)
