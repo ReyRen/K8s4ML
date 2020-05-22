@@ -19,20 +19,21 @@ export KFCTL="${KFCTL:-${CONFIG_DIR}/kfctl}"
 export KUBEFLOW_DEL_SCRIPT="${KF_DIR}/deepops-delete-kubeflow.sh"
 
 # Download URLs and versions
-export KFCTL_FILE=kfctl_v1.0-rc.1-0-g963c787_linux.tar.gz
+export KFCTL_FILE=kfctl_v1.0.2-0-ga476281_linux.tar.gz
 #export KFCTL_URL="https://github.com/kubeflow/kfctl/releases/download/v1.0-rc.1/${KFCTL_FILE}"
 export KFCTL_URL="http://reyren.cn:8001/${KFCTL_FILE}"
 
 # Config 1: https://www.kubeflow.org/docs/started/k8s/kfctl-existing-arrikto/
-#export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/b37bad9eded2c47c54ce1150eb9e6edbfb47ceda/kfdef/kfctl_existing_arrikto.0.7.1.yaml"
-export CONFIG_URI="http://reyren.cn:8001/kfctl_existing_arrikto.0.7.1.yaml"
-export CONFIG_FILE="${KF_DIR}/kfctl_existing_arrikto.0.7.1.yaml"
-
-# Config 2: https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/
-#export NO_AUTH_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v0.7-branch/kfdef/kfctl_k8s_istio.0.7.0.yaml"
-export NO_AUTH_CONFIG_URI="http://reyren.cn:8001/kfctl_k8s_istio.0.7.0.yaml"
-export NO_AUTH_CONFIG_FILE="${KF_DIR}/kfctl_k8s_istio.0.7.0.yaml"
-
+#Export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/b37bad9eded2c47c54ce1150eb9e6edbfb47ceda/kfdef/kfctl_existing_arrikto.0.7.1.yaml"
+#export CONFIG_URI="http://reyren.cn:8001/kfctl_existing_arrikto.0.7.1.yaml"
+#export CONFIG_FILE="${KF_DIR}/kfctl_existing_arrikto.0.7.1.yaml"
+#
+## Config 2: https://www.kubeflow.org/docs/started/k8s/kfctl-k8s-istio/
+##export NO_AUTH_CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v0.7-branch/kfdef/kfctl_k8s_istio.0.7.0.yaml"
+#export NO_AUTH_CONFIG_URI="http://reyren.cn:8001/kfctl_k8s_istio.0.7.0.yaml"
+#export NO_AUTH_CONFIG_FILE="${KF_DIR}/kfctl_k8s_istio.0.7.0.yaml"
+export CONFIG_URI="http://reyren.cn:8001/kfctl_k8s_istio.v1.0.2.yaml"
+export CONFIG_FILE="${KF_DIR}/kfctl_k8s_istio.v1.0.2.yaml"
 
 function help_me() {
   echo "Usage:"
@@ -109,8 +110,9 @@ function install_dependencies() {
   kubectl get storageclass 2>&1 | grep "No resources found." >/dev/null 2>&1
   if [ $? -eq 0 ] ; then
       echo "No storageclass found"
-      echo "To provision Ceph storage, run: ./scripts/k8s_deploy_rook.sh"
-      exit 1
+      echo "create one....."
+      /bin/bash ${SCRIPT_DIR}/k8s_deploy_pvs.sh
+      echo "create finsh"
   fi
   
   # Proxies
@@ -149,9 +151,15 @@ function stand_up() {
   ${KFCTL} build -V -f ${CONFIG_URI}
   echo "build finished"
 
+  echo "put modified kustomize to the KF_DIR"
+  echo "download modified kustomize..."
+  rm -rf kustomize
+  wget -c http://reyren.cn:8001/kustomize-1.0.2.tar.gz
+  tar -zxvf kustomize-1.0.2.tar.gz
+  rm -rf kustomize-1.0.2.tar.gz
+
   # Update Kubeflow with the NGC containers and NVIDIA configurations
-  ${SCRIPT_DIR}/update_kubeflow_config.py
-  echo "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT"
+#  ${SCRIPT_DIR}/update_kubeflow_config.py
 
   # XXX: Add potential CONFIG customizations here before applying
   ${KFCTL} apply -V -f ${CONFIG_FILE}

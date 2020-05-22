@@ -82,12 +82,12 @@ fi
 echo
 echo "Deploying monitoring stack..."
 echo "Creating monitoring namespace..."
-if $(kubectl get namespaces | grep monitoring) >/dev/null 2>&1 ; then
+#if $(kubectl get namespaces | grep monitoring) >/dev/null 2>&1 ; then
 	kubectl create namespace monitoring # helm v3
-else
+#else
 	echo "namespace/monitoring already exists!"
-fi
-helm update
+#fi
+helm repo update
 if ! helm status prometheus-operator >/dev/null 2>&1 ; then
     helm install \
         prometheus-operator \
