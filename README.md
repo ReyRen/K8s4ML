@@ -2,6 +2,52 @@
 K8s platform specialized in Machine learning
 
 
+## HOW TO USE
+
+```
+git clone
+./scripts/setup.sh
+vi config/inventory # modify by yourself
+# MAKE passwordless access from Ansible system to Universal GPU servers
+ssh-keygen
+ssh-copy-id <username>@<host>
+ansible all -m raw -a "hostname" # verify the configuration
+ansible-playbook -l k8s-cluster playbooks/k8s-cluster.yml # install kubernetes using ansible and kubespray
+kubectl get nodes # Verify
+kubectl run gpu-test --rm -t -i --restart=Never --image=nvidia/cuda --limits=nvidia.com/gpu=1 nvidia-smi # test a GPU job to ensure that your kubernetes setup can tap into GPUs
+```
+
+**Persistent Storage** (please modified by yourself)
+```
+./scripts/k8s_deploy_pvs.sh
+```
+
+**Monitoring**
+```
+./scripts/k8s_deploy_monitoring.sh
+```
+
+**Kubeflow**(can't work properly at present)
+```
+./scripts/k8s_deploy_kubeflow.sh
+```
+
+**Removing  nodes**
+```
+ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename1"
+```
+This will drain nodename0 & nodename1, stop Kubernetes services, delete certificates, and finally execute the kubectl command to delete the nodes.
+
+**Reset the Cluster**
+```
+ansible-playbook kubespray/remove-node.yml --extra-vars "node=nodename0,nodename1,<...>"
+```
+Note: There is also a Kubespray reset.yml playbook, but this does not do a complete tear-down of the cluster. Certificates and other artifacts might persist on each host, leading to a problematic redeployment in the future. The remove-node.yml playbook runs reset.yml as part of the process.
+
+
+
+----------------------------------------------------------------------------------------------------
+
 ## 2020.4.13
 持续更新代码(使用deepos & kubespary........)
 
