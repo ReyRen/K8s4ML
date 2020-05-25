@@ -108,6 +108,11 @@
   when: not (ansible_os_family in ["CoreOS", "Coreos", "Container Linux by CoreOS", "Flatcar", "Flatcar Container Linux by Kinvolk", "ClearLinux"] or is_ostree) and (docker_package_info.pkgs|length > 0)
   ignore_errors: true
 
+# workaround for https://support.platform9.com/hc/en-us/articles/360047992654-Docker-Error-response-from-daemon-client-version-1-40-is-too-new-Maximum-supported-API-version-is-1-39-
+- name: ensure the docker-cli are downgrage
+  shell: "apt-get install -y --allow-downgrades docker-ce-cli=5:19.03.8~3-0~ubuntu-$(lsb_release -cs)"
+
+
 - name: get available packages on Ubuntu
   command: apt-cache policy docker-ce
   when:
@@ -183,15 +188,15 @@
   with_items:
     - docker
 
-      #- name: Download the packed K8s4ml-images from reyren.cn:8001
-      #  shell: "wget -c reyren.cn:8001/K8s4ml-images.tar -O /root/K8s4ml-images.tar"
-      #  retries: 4
-      #  delay: "{{ retry_stagger | default(5) }}"
-      #
-      #- name: Load docker all K8s4ml-images
-      #  shell: "docker load -i /root/K8s4ml-images.tar"
-      #  retries: 4
-      #  delay: "{{ retry_stagger | default(5) }}"
+- name: Download the packed K8s4ml-images from reyren.cn:8001
+  shell: "wget -c reyren.cn:8001/K8s4ml-images.tar -O /root/K8s4ml-images.tar"
+  retries: 4
+  delay: "{{ retry_stagger | default(5) }}"
+
+- name: Load docker all K8s4ml-images
+  shell: "docker load -i /root/K8s4ml-images.tar"
+  retries: 4
+  delay: "{{ retry_stagger | default(5) }}"
 - name: mkdir mount dir
   shell: "mkdir -p /root/K8s4ml-images-mountDir"
 
