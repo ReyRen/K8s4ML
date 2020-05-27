@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+#-*- coding: UTF-8 -*-
 
 import yaml
 import logging
@@ -21,13 +22,38 @@ import os
 #        for k, v in doc.items():
 #            print(k, "->", v)
 def generate_yaml_doc(yaml_file):
-    deploymentName = raw_input("please input the name of deployment you want create(pod-testing): ")
+    deploymentName = raw_input("输入想要创建的Deployment名称(pod-testing): ")
+    replicasNum = raw_input("输入想要创建的replicas数量(1): ")
+    matchLabels = raw_input("输入想要创建的matchLabels名称(testing-label): ")
+    containerName = raw_input("输入想要创建的容器的名称(testing-container): ")
+    imageName = raw_input("输入想要创建的image的名称: ")
+
+
     if deploymentName == "":
         deploymentName = "pod-testing"
+    if replicasNum == "":
+        replicasNum = "1"
+    if matchLabels == "":
+        replicasNum = "testing-label"
+    if containerName == "":
+        containerName = testing-container
+    if imageName == "":
+        print('请指定imageName')
+        os._exit(1)
+
     py_object = {
                 'apiVersion':'apps/v1',
                 'kind':'Deployment',
-                'metadata':{'name':deploymentName,'namespace':'ai'}}
+                'metadata':{'name':deploymentName,'namespace':'ai'},
+                'spec':{'replicas':int(replicasNum),
+                        'selector':{'matchLabels':{'run':matchLabels}}
+                        #'template':{'metadata':{'labels':{'run':matchLabels}},
+                        #            'spec':{'containers':{'name':containerName,
+                        #                                  'image':imageName}
+                        #                    }
+                        #            }
+                        }
+                }
     file = open(yaml_file, 'w')
     yaml.dump(py_object, file)
     file.close()
