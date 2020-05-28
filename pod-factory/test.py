@@ -56,6 +56,22 @@ def generate_yaml_doc(yaml_file):
     if pvcName == "":
         pvcName = "pod-pvc-volume-1"
 
+    serviceornot = raw_input("想要创建service来隐藏pod吗(yes|yes or no): ")
+    if serviceornot == "":
+        serviceornot = "yes"
+    if serviceornot == "yes":
+        serviceName = raw_input("请输入想要创建的service name(svc-testing): ")
+        svcSelector = raw_input("请输入想要被service管理的label name(testing-label): ")
+        portName = raw_input("请输入想要映射端口的别名: ")
+        portProtocol = raw_input("请输入映射端口的protocol: ")
+        nodePort = raw_input("请输入外部访问svc的端口: ")
+        port = raw_input("请输入集群访问svc的端口: ")
+        targetPort = raw_input("请输入pod内部的端口: ")
+        if serviceName == "":
+            serviceName = "svc-testing"
+        if svcSelector == "":
+            svcSelector = matchLabels
+
     py_object = {
                 'apiVersion':'apps/v1',
                 'kind':'Deployment',
@@ -66,11 +82,21 @@ def generate_yaml_doc(yaml_file):
                             'spec':{'containers':[{'name':containerName,'image':imageName,'command':commandStr, 'resources':{'limits':{'nvidia.com/gpu':int(gpuNum)}},'volumeMounts':[{'name':volumeMountsName, 'mountPath':mountPath}]}],
                                     'nodeSelector':{'disktype':disktype},
                                     'volumes':[{'name':volumeMountsName,'persistentVolumeClaim':{'claimName':pvcName}}]}}
-                        },
-                '---'
+                        }
                 }
+    if serviceornot == "yes":
+        py_object2 = {
+                      'apiVersion':'v1',
+                      'kind':'Service',
+                      'metadata':{'name':serviceName,'namespace':'ai'},
+                      'spec':{'type':'NodePort','selector':{'run':svcSelector},'ports':[{'name':portName,'protocol':portProtocol,'nodePort':int(nodePort),'port':int(port),'targetPort':int(targetPort)}]}
+
+                     }
     file = open(yaml_file, 'w')
-    yaml.dump(py_object, file)
+    if serviceornot == "yes":
+        yaml.dump_all([py_object,py_object2], file)
+    else:
+        yaml.dump(py_object, file)
     file.close()
 
 
