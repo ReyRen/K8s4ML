@@ -175,3 +175,6 @@ if __name__ == '__main__':
         logging.info("Created RS in %s namespaces." %(namespace))
     except IOError as e:
         logging.error("Failed to create RS in %s namespaces: {}" %(namespace))
+
+# apt update -y; apt install ssh vim -y; tmp="PermitRootLogin yes"; sed -i "/^#PermitRootLogin/c$tmp" /etc/ssh/sshd_conf; /etc/init.d/ssh restart
+# echo root:admin123|chpasswd

@@ -59,11 +59,7 @@ function create_namespace(){
 	if [ "$Arg" = "" ] || [ "$Arg" = "default" ]; then
 		Arg="default"
 	else
-		#kubectl get ns | grep $1 >/dev/null 2>&1
-	#if [ $? -eq 1 ]; then
 		kubectl create namespace $Arg
-	#else
-	#	echo "The $1 namespace already exists!"
 	fi
 	ARG=$Arg
 }
