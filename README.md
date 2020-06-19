@@ -16,6 +16,8 @@ ansible-playbook -l k8s-cluster playbooks/k8s-cluster.yml # install kubernetes u
 kubectl get nodes # Verify
 kubectl run gpu-test --rm -t -i --restart=Never --image=nvidia/cuda --limits=nvidia.com/gpu=1 nvidia-smi # test a GPU job to ensure that your kubernetes setup can tap into GPUs
 ```
+**NOTE**
+在双网卡情况下，/etc/hosts默认会去找default路由所对应的网卡，有时候并不符合inventory所指定的，如果也遇到这种情况，那么就将`K8s4ML/kubespray/roles/kubernetes/preinstall/tasks/0090-etchosts.yml`中的“populate inventory into hosts file”注掉，然后自己写hosts文件并且populate到各个节点
 
 **Persistent Storage** (please modified by yourself)
 ```
