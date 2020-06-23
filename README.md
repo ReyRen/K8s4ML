@@ -128,3 +128,21 @@ Restore tons of images, digests and files in subnet NAS and reyren.cn:8001. This
 docker save $(docker images --format '{{.Repository}}:{{.Tag}}') -o allinone.tar
 docker load -i allinone.tar
 ```
+
+## 2020.6.23
+
+这次经历了一些小的问题，成功在8+1，多几多卡的集群环境中完成了部署. 这里需要注意的是, 如果环境是双网卡的(千兆与万兆)，并且在集群内部想要使用的是万兆环境的话，需要进行一些改变:
+
+```
+# kubespray/roles/kubespray-defaults/defaults/main.yaml
+
+{{ item }}: "{{ hostvars[item].get('ansible_default_ipv4', {'address': '127.0.0.1'})['address'] }}"
+
+TO
+
+{{ item }}: "{{ hostvars[item].ansible_enp0.ipv4.address }}"
+```
+说明一下，因为K8s4ML代码中指定的node的INTERNAL_IP是直接通过`ansible_default_ipv4`这个facts中获取，这个值呢是根觉/proc中加载的系统的默认route所拿到的，一般情况我们使用的是万兆网络作为外网的. 所以这样的话,所创建的集群INTERNAL_IP就是千兆网络了，这并不是我们所需要的. 
+这里的`enp0`是我修改过的万兆网卡名.
+
+还需要主义的是, `/etc/hosts`也是这种情况，注意ansible中的`fallback_ips`
