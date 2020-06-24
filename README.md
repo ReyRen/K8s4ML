@@ -148,3 +148,9 @@ TO
 这里的`enp0`是我修改过的万兆网卡名.
 
 还需要主义的是, `/etc/hosts`也是这种情况，注意ansible中的`fallback_ips`
+
+## 2020.6.24
+
+今天又入坑出坑了: 昨天成功在万兆网下进行集群管理了，这样的话，创建的worker pod就可以享受万兆网了，并且使pod内的网络也是可以访问外网的。但是当进行pod间的网络带宽测试时，吃惊的发现，带宽损耗达到50% 。 经过分析，该集群中总共130多个pod参与整个集群基础设施的运作，并且全部是使用万昭网进行的，这样对带宽的损耗是相当大的。所以，想法必须是让千兆网进行apiserver, etcd等的管理，万兆万进行业务训练。
+
+在Kubernetes社区，pod内只实现了但网卡形式，但是CNI接口为其他人创造了可能性。Intel开源了[multus-cni](https://github.com/intel/multus-cni/blob/master/doc/quickstart.md)
